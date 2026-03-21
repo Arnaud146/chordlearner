@@ -46,9 +46,24 @@ function getEnvOrThrow(key: string): string {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const isProtected = isProtectedPath(pathname);
+  const isAuthPage = isAuthPath(pathname);
 
   if (pathname.startsWith("/api") && isUnsafeMethod(request.method) && !isAllowedOrigin(request)) {
     return NextResponse.json({ error: "Origin non autorisee" }, { status: 403 });
+  }
+
+  if (!isProtected && !isAuthPage) {
+    return NextResponse.next({ request });
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "Configuration serveur incomplete" }, { status: 503 });
+    }
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   let response = NextResponse.next({
@@ -81,9 +96,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const isProtected = isProtectedPath(pathname);
-  const isAuthPage = isAuthPath(pathname);
 
   if (!user && isProtected) {
     if (pathname.startsWith("/api")) {
