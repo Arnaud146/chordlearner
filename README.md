@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ChordLearner
 
-## Getting Started
+Application web pour apprendre des morceaux au piano a partir de grilles d'accords.
 
-First, run the development server:
+## Stack technique
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase (database + storage)
+- Vitest pour les tests
+
+## Demarrage rapide
 
 ```bash
+# Installer les dependances
+npm install
+
+# Copier et remplir les variables d'environnement
+cp .env.example .env.local
+# Windows PowerShell: Copy-Item .env.example .env.local
+
+# Lancer le serveur de developpement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Application disponible sur `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables d'environnement
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server only)
+- `OCR_SPACE_API_KEY` (optionnel, server only)
+- `GOOGLE_CLOUD_VISION_API_KEY` (optionnel, server only)
 
-## Learn More
+## OCR providers
 
-To learn more about Next.js, take a look at the following resources:
+Dans l'ecran OCR, vous pouvez choisir le provider:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `OCR.space`
+- `Google Vision`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Setup Supabase (minimum)
 
-## Deploy on Vercel
+1. Creer un projet Supabase.
+2. Executer la migration `supabase/migrations/001_init_mvp.sql`.
+3. Creer un bucket public `ocr-imports`.
+4. Renseigner `.env.local`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Commande | Description |
+| --- | --- |
+| `npm run dev` | Serveur de developpement |
+| `npm run build` | Build de production |
+| `npm run start` | Serveur de production |
+| `npm run lint` | Lint ESLint |
+| `npm run test` | Tests unitaires/integration |
+| `npm run test:watch` | Tests en mode watch |
+| `npm run screenshots` | Captures Playwright pour le brief design (voir `docs/SCREENSHOTS-GUIDE.md`) |
+
+## Documentation
+
+- `docs/architecture.md`
+- `docs/schema.md`
+- `docs/chord-normalization-rules.md`
+- `docs/api-contracts.md`
+- `docs/design-brief-for-ai.md` — contexte produit + écrans (redesign / IA)
+- `docs/SCREENSHOTS-GUIDE.md` — captures pour accompagner le brief
