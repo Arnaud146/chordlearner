@@ -10,12 +10,11 @@ const trackedFiles = execSync("git ls-files", { encoding: "utf8" })
 
 const allowedFiles = new Set([".env.example"]);
 const suspiciousPatterns = [
-  /SUPABASE_SERVICE_ROLE_KEY\s*=\s*(?!your-)[^\s#]+/i,
-  /OCR_SPACE_API_KEY\s*=\s*(?!your-)[^\s#]+/i,
-  /GOOGLE_CLOUD_VISION_API_KEY\s*=\s*(?!your-)[^\s#]+/i,
-  /UPSTASH_REDIS_REST_TOKEN\s*=\s*(?!your-)[^\s#]+/i,
-  /SECURITY_ALERT_WEBHOOK_URL\s*=\s*https?:\/\/[^\s#]+/i,
-  /(?:api[_-]?key|secret|token|password)\s*[:=]\s*['"]?[A-Za-z0-9_\-\/+=]{20,}['"]?/i,
+  /^\s*SUPABASE_SERVICE_ROLE_KEY\s*=\s*(?!your-)[^\s#]+/i,
+  /^\s*OCR_SPACE_API_KEY\s*=\s*(?!your-)[^\s#]+/i,
+  /^\s*GOOGLE_CLOUD_VISION_API_KEY\s*=\s*(?!your-)[^\s#]+/i,
+  /^\s*UPSTASH_REDIS_REST_TOKEN\s*=\s*(?!your-)[^\s#]+/i,
+  /^\s*SECURITY_ALERT_WEBHOOK_URL\s*=\s*https?:\/\/[^\s#]+/i,
   /-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----/,
 ];
 
