@@ -337,6 +337,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && isRecoverableOCRInputError(error.message)) {
       return apiError(error.message, 422);
     }
+    console.error("[ocr.detect]", getErrorMessage(error));
     return handleApiError(error, "OCR detect endpoint error");
   }
 }
