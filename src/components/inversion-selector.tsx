@@ -22,13 +22,13 @@ export function InversionSelector({
     <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
       <CardHeader>
         <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-          Renversement
+          Inversion
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {options.length === 0 ? (
           <p className={`${optionBClassNames.body} text-sm text-[var(--song-text-muted)]`}>
-            Aucun voicing disponible pour cet accord.
+            No voicing available for this chord.
           </p>
         ) : null}
         {options.map((option) => {

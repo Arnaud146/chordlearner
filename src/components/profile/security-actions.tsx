@@ -31,7 +31,7 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
     setErrorMessage(null);
 
     if (!userEmail) {
-      setErrorMessage("Email non disponible pour reinitialiser le mot de passe.");
+      setErrorMessage("Email unavailable to reset the password.");
       return;
     }
 
@@ -43,12 +43,12 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
         redirectTo: buildRecoveryRedirectUrl(),
       });
       if (error) throw error;
-      setSuccessMessage("Un email de reinitialisation a ete envoye.");
+      setSuccessMessage("A reset email has been sent.");
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Impossible d'envoyer l'email de reinitialisation.",
+          : "Unable to send the reset email.",
       );
     } finally {
       setIsSendingReset(false);
@@ -73,7 +73,7 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
       router.replace("/login");
       router.refresh();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Deconnexion impossible.");
+      setErrorMessage(error instanceof Error ? error.message : "Sign-out failed.");
       if (scope === "local") {
         setIsSigningOutLocal(false);
       } else {
@@ -93,7 +93,7 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
 
       {errorMessage ? (
         <Alert variant="destructive">
-          <AlertTitle>Erreur</AlertTitle>
+          <AlertTitle>Error</AlertTitle>
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       ) : null}
@@ -105,7 +105,7 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
           disabled={isSendingReset}
           className={`${optionBClassNames.body} rounded-xl bg-[var(--song-accent)] px-4 text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent)]/90`}
         >
-          {isSendingReset ? "Envoi..." : "Envoyer un email de reinitialisation"}
+          {isSendingReset ? "Sending..." : "Send a reset email"}
         </Button>
 
         <Button
@@ -115,7 +115,7 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
           disabled={isSigningOutLocal || isSigningOutGlobal}
           className={`${optionBClassNames.body} rounded-xl border-[var(--song-border)] bg-[var(--song-surface)] text-[var(--song-text)] hover:bg-[var(--song-surface-muted)]`}
         >
-          {isSigningOutLocal ? "Deconnexion..." : "Se deconnecter de cet appareil"}
+          {isSigningOutLocal ? "Signing out..." : "Sign out of this device"}
         </Button>
 
         <Button
@@ -125,7 +125,7 @@ export function SecurityActions({ userEmail }: SecurityActionsProps) {
           disabled={isSigningOutGlobal || isSigningOutLocal}
           className={`${optionBClassNames.body} rounded-xl border-[var(--song-border)] bg-[var(--song-surface)] text-[var(--song-text)] hover:bg-[var(--song-surface-muted)]`}
         >
-          {isSigningOutGlobal ? "Deconnexion..." : "Se deconnecter de tous les appareils"}
+          {isSigningOutGlobal ? "Signing out..." : "Sign out of all devices"}
         </Button>
       </div>
     </div>

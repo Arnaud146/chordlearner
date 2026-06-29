@@ -1,4 +1,4 @@
-export function scoreVoicingCompactness(notesMidi: number[]): number {
+function scoreVoicingCompactness(notesMidi: number[]): number {
   if (notesMidi.length <= 1) return 1;
   const sorted = [...notesMidi].sort((a, b) => a - b);
   const range = sorted[sorted.length - 1] - sorted[0];
@@ -9,7 +9,7 @@ export function scoreVoicingCompactness(notesMidi: number[]): number {
   return 5;
 }
 
-export function scoreVoicingRegister(notesMidi: number[]): number {
+function scoreVoicingRegister(notesMidi: number[]): number {
   if (notesMidi.length === 0) return 3;
   const avg = notesMidi.reduce((acc, note) => acc + note, 0) / notesMidi.length;
   // Right hand beginner-friendly center around C4-G4 (60-67)

@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createProfileRepository, type ProfileStats } from "@/lib/db/repositories/profile.repository";
 import { createClient } from "@/lib/supabase/server";
 
-function formatFrenchDate(dateValue: string | null | undefined): string {
-  if (!dateValue) return "Date inconnue";
+function formatDate(dateValue: string | null | undefined): string {
+  if (!dateValue) return "Unknown date";
   const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return "Date inconnue";
-  return new Intl.DateTimeFormat("fr-FR", {
+  if (Number.isNaN(date.getTime())) return "Unknown date";
+  return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -64,14 +64,14 @@ export default async function ProfilPage() {
       error instanceof Error &&
       /relation "profiles" does not exist/i.test(error.message)
     ) {
-      loadError = "Le profil n'est pas disponible. Lance la migration 005_profiles.sql.";
+      loadError = "The profile is not available. Run the 005_profiles.sql migration.";
     } else {
       loadError =
-        error instanceof Error ? error.message : "Impossible de charger les donnees du profil.";
+        error instanceof Error ? error.message : "Unable to load the profile data.";
     }
   }
 
-  const memberSinceLabel = formatFrenchDate(user.created_at);
+  const memberSinceLabel = formatDate(user.created_at);
 
   return (
     <div
@@ -81,13 +81,13 @@ export default async function ProfilPage() {
         <p
           className={`${optionBClassNames.body} text-xs font-semibold uppercase tracking-[0.14em] text-[var(--song-text-subtle)]`}
         >
-          Compte
+          Account
         </p>
         <h1 className={`${optionBClassNames.display} text-5xl leading-[0.95] font-bold md:text-7xl`}>
-          Mon profil
+          My profile
         </h1>
         <p className={`${optionBClassNames.body} max-w-3xl text-lg text-[var(--song-text-muted)] md:text-xl`}>
-          Mets a jour ton identite et consulte les statistiques de ton espace ChordLearner.
+          Update your identity and check the statistics for your ChordLearner space.
         </p>
       </section>
 
@@ -95,7 +95,7 @@ export default async function ProfilPage() {
         <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
           <CardHeader>
             <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-              Informations du compte
+              Account information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -105,12 +105,12 @@ export default async function ProfilPage() {
                   Email
                 </p>
                 <p className={`${optionBClassNames.body} mt-2 text-sm font-semibold text-[var(--song-text)]`}>
-                  {user.email ?? "Email non disponible"}
+                  {user.email ?? "Email unavailable"}
                 </p>
               </div>
               <div className="rounded-xl border border-[var(--song-border)] bg-[var(--song-surface-soft)] p-4">
                 <p className={`${optionBClassNames.body} text-xs uppercase tracking-[0.1em] text-[var(--song-text-subtle)]`}>
-                  Membre depuis
+                  Member since
                 </p>
                 <p className={`${optionBClassNames.body} mt-2 text-sm font-semibold text-[var(--song-text)]`}>
                   {memberSinceLabel}
@@ -134,20 +134,20 @@ export default async function ProfilPage() {
         <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
           <CardHeader>
             <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-              Statistiques
+              Statistics
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3">
             {stats ? (
               <>
-                <StatsCard label="Morceaux" value={stats.songsCount} />
+                <StatsCard label="Songs" value={stats.songsCount} />
                 <StatsCard label="Presets" value={stats.presetsCount} />
-                <StatsCard label="Imports OCR" value={stats.ocrImportsCount} />
+                <StatsCard label="OCR imports" value={stats.ocrImportsCount} />
                 <StatsCard label="Extractions" value={stats.extractionsCount} />
               </>
             ) : (
               <p className={`${optionBClassNames.body} text-sm text-[var(--song-text-muted)]`}>
-                Les statistiques ne sont pas disponibles pour le moment.
+                Statistics are not available at the moment.
               </p>
             )}
           </CardContent>
@@ -158,7 +158,7 @@ export default async function ProfilPage() {
         <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
           <CardHeader>
             <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-              Securite
+              Security
             </CardTitle>
           </CardHeader>
           <CardContent>

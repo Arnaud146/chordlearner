@@ -26,6 +26,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: selection });
   } catch (error) {
-    return handleApiError(error, "Impossible de sauvegarder la selection de voicing du preset");
+    return handleApiError(error, "Unable to save the preset voicing selection");
   }
 }

@@ -23,11 +23,6 @@ Toutes les réponses utilisent un format JSON:
   - body: `{ toKey, notationPreference }`
   - return: `{ song, fromKey, toKey, notationPreference, semitoneDelta }`
 
-## Chords
-
-- `GET /api/songs/[songId]/chords/occurrences`
-- `GET /api/songs/[songId]/chords/unique`
-
 ## Voicings
 
 - `GET /api/songs/[songId]/voicings?chord=...&keyContext=...&handMode=RH|BH`

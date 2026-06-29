@@ -18,10 +18,10 @@ import type { NotationPreference, SongRow } from "@/lib/types/db";
 async function parseApiResponse<T>(response: Response): Promise<T> {
   const payload = (await response.json()) as { data?: T; error?: string };
   if (!response.ok) {
-    throw new Error(payload.error ?? "Une erreur est survenue");
+    throw new Error(payload.error ?? "An error occurred");
   }
   if (!payload.data) {
-    throw new Error("Reponse API invalide");
+    throw new Error("Invalid API response");
   }
   return payload.data;
 }
@@ -71,7 +71,7 @@ export function ManualInputForm() {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Impossible de creer le morceau. Verifie la saisie puis reessaie.",
+          : "Unable to create the song. Check your input and try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -82,21 +82,21 @@ export function ManualInputForm() {
     <Card className="rounded-2xl border border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
       <CardHeader>
         <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-          Details du morceau
+          Song details
         </CardTitle>
         <CardDescription className={`${optionBClassNames.body} text-sm text-[var(--song-text-muted)]`}>
-          Renseigne les infos puis lance le parsing de la grille.
+          Fill in the info then start parsing the chart.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="title" className={`${optionBClassNames.body} text-[var(--song-text)]`}>
-              Titre
+              Title
             </Label>
             <Input
               id="title"
-              placeholder="Exemple: Imagine"
+              placeholder="Example: Imagine"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               required
@@ -106,11 +106,11 @@ export function ManualInputForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="artist" className={`${optionBClassNames.body} text-[var(--song-text)]`}>
-              Artiste
+              Artist
             </Label>
             <Input
               id="artist"
-              placeholder="Exemple: John Lennon"
+              placeholder="Example: John Lennon"
               value={artist}
               onChange={(event) => setArtist(event.target.value)}
               disabled={isSubmitting}
@@ -122,11 +122,11 @@ export function ManualInputForm() {
               htmlFor="originalKey"
               className={`${optionBClassNames.body} text-[var(--song-text)]`}
             >
-              Tonalite d&apos;origine (optionnel)
+              Original key (optional)
             </Label>
             <Input
               id="originalKey"
-              placeholder="Exemple: C, F#, Bb"
+              placeholder="Example: C, F#, Bb"
               value={originalKey}
               onChange={(event) => setOriginalKey(event.target.value)}
               disabled={isSubmitting}
@@ -135,25 +135,25 @@ export function ManualInputForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="rawText" className={`${optionBClassNames.body} text-[var(--song-text)]`}>
-              Grille d&apos;accords (texte brut)
+              Chord chart (raw text)
             </Label>
             <textarea
               id="rawText"
               className={`${optionBClassNames.body} min-h-48 w-full rounded-xl border border-[var(--song-border)] bg-[var(--song-surface-soft)] px-3 py-2 text-sm outline-none ring-[var(--song-border)]/40 focus-visible:ring-[3px]`}
-              placeholder={"Exemple:\nC   G   Am   F\nDm7   G   C/E"}
+              placeholder={"Example:\nC   G   Am   F\nDm7   G   C/E"}
               value={rawText}
               onChange={(event) => setRawText(event.target.value)}
               disabled={isSubmitting}
               required
             />
             <p className={`${optionBClassNames.body} text-xs text-[var(--song-text-subtle)]`}>
-              Exemple couplet/refrain:
+              Verse/chorus example:
               <br />
               C   G   Am   F
               <br />
               Dm7   G   C/E
               <br />
-              Refrain: F   G   Em7   Am
+              Chorus: F   G   Em7   Am
             </p>
           </div>
           {errorMessage ? (
@@ -163,10 +163,10 @@ export function ManualInputForm() {
           ) : null}
           <Button
             type="submit"
-            className={`${optionBClassNames.body} w-full rounded-xl bg-[var(--song-accent)] font-bold text-[var(--song-accent-foreground)] shadow-[var(--song-shadow)] hover:bg-[var(--song-accent)]/90`}
+            className={`${optionBClassNames.body} min-h-[44px] w-full rounded-xl bg-[var(--song-accent)] font-bold text-[var(--song-accent-foreground)] shadow-[var(--song-shadow)] hover:bg-[var(--song-accent-hover)]`}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Parsing en cours..." : "Parser et creer le morceau"}
+            {isSubmitting ? "Parsing..." : "Parse and create the song"}
           </Button>
         </form>
       </CardContent>

@@ -10,7 +10,7 @@ interface LoadingStateCardProps {
 }
 
 export function LoadingStateCard({
-  label = "Chargement en cours...",
+  label = "Loading...",
   lines = 3,
 }: LoadingStateCardProps) {
   return (

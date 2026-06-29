@@ -47,7 +47,7 @@ function isImageType(type: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     if (isOcrKillSwitchEnabled()) {
-      return apiError("OCR temporairement desactive pour maintenance/securite.", 503);
+      return apiError("OCR temporarily disabled for maintenance/security.", 503);
     }
 
     const supabase = await createClient();
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         payload: { used: ipLimit.used, limit: OCR_UPLOAD_IP_LIMIT },
       });
-      return apiError("Trop d'uploads OCR depuis cette IP. Reessayez plus tard.", 429);
+      return apiError("Too many OCR uploads from this IP. Please try again later.", 429);
     }
 
     const userLimit = await consumeRateLimit({
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         payload: { used: userLimit.used, limit: OCR_UPLOAD_USER_LIMIT },
       });
-      return apiError("Quota horaire d'upload OCR atteint. Reessayez plus tard.", 429);
+      return apiError("Hourly OCR upload quota reached. Please try again later.", 429);
     }
 
     const quotaConfig = getQuotaConfig("ocr_upload");
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         payload: { reason: quota.reason, dayUsed: quota.dayUsed, monthUsed: quota.monthUsed },
       });
-      return apiError("Quota OCR atteint (jour/mois).", 429);
+      return apiError("OCR quota reached (day/month).", 429);
     }
 
     const formData = await request.formData();
@@ -106,20 +106,20 @@ export async function POST(request: NextRequest) {
     const songId = formData.get("songId");
 
     if (!(file instanceof File)) {
-      return apiError("Fichier manquant (field: file)", 400);
+      return apiError("Missing file (field: file)", 400);
     }
     if (file.size > MAX_UPLOAD_BYTES) {
-      return apiError(`Fichier trop volumineux (max ${MAX_UPLOAD_BYTES / 1024 / 1024} Mo)`, 413);
+      return apiError(`File too large (max ${MAX_UPLOAD_BYTES / 1024 / 1024} MB)`, 413);
     }
     if (file.size === 0) {
-      return apiError("Le fichier est vide", 400);
+      return apiError("The file is empty", 400);
     }
 
     // Validate file content via magic bytes
     const fileBuffer = await file.arrayBuffer();
     const detectedType = detectFileType(fileBuffer);
     if (!detectedType || (!isImageType(detectedType) && !isPdfType(detectedType))) {
-      return apiError("Type de fichier non reconnu. Seules les images et les PDF sont acceptes.", 400);
+      return apiError("Unrecognized file type. Only images and PDFs are accepted.", 400);
     }
 
     if (
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       songId &&
       !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(songId)
     ) {
-      return apiError("songId invalide (UUID attendu)", 400);
+      return apiError("Invalid songId (UUID expected)", 400);
     }
 
     const extension = isPdfType(detectedType) ? "pdf" : detectedType.split("/")[1] ?? "jpg";
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
 
     if (uploadRes.error) {
       console.error("[ocr/upload] storage error", uploadRes.error.message);
-      return apiError("Upload impossible. Reessayez plus tard.", 500);
+      return apiError("Upload failed. Please try again later.", 500);
     }
 
     const signedUrlRes = await admin.storage
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
         "[ocr/upload] signed url error",
         signedUrlRes.error?.message ?? "signed URL missing",
       );
-      return apiError("Upload effectue mais URL signee indisponible. Reessayez.", 500);
+      return apiError("Upload completed but signed URL unavailable. Please try again.", 500);
     }
     const imageUrl = signedUrlRes.data.signedUrl;
 
@@ -177,6 +177,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    return handleApiError(error, "Erreur pendant l'upload OCR");
+    return handleApiError(error, "Error during OCR upload");
   }
 }

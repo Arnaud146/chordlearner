@@ -6,8 +6,10 @@ import { ocrDetectSchema } from "@/lib/api/schemas/ocr.schemas";
 import { createOCRRepository } from "@/lib/db/repositories/ocr.repository";
 import {
   postprocessOCRTokens,
+  rebuildOCRResult,
   type OCRPostprocessResult,
 } from "@/lib/domain/ocr/ocr-postprocess";
+import { fuseProviderTokens } from "@/lib/domain/ocr/ocr-provider-fusion";
 import {
   detectTextWithGoogleVision,
   detectTextWithOCRSpace,
@@ -53,16 +55,16 @@ const OCR_DETECT_USER_LIMIT = 80;
 const OCR_DETECT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Erreur OCR inconnue";
+  return error instanceof Error ? error.message : "Unknown OCR error";
 }
 
 function isRecoverableOCRInputError(message: string): boolean {
   return (
-    message.includes("ne supporte pas les PDF via URL") ||
-    message.includes("ne peut pas acceder a l'URL") ||
+    message.includes("does not support PDF via URL") ||
+    message.includes("cannot access the provided URL") ||
     message.includes("Bad image data") ||
-    message.includes("n'a renvoye aucun resultat exploitable") ||
-    message.includes("Aucun provider OCR n'a fonctionne")
+    message.includes("returned no usable result") ||
+    message.includes("No OCR provider worked")
   );
 }
 
@@ -140,7 +142,7 @@ function toRunSummary(outcome: ProviderOutcome): ProviderRunSummary {
 export async function POST(request: NextRequest) {
   try {
     if (isOcrKillSwitchEnabled()) {
-      return apiError("OCR temporairement desactive pour maintenance/securite.", 503);
+      return apiError("OCR temporarily disabled for maintenance/security.", 503);
     }
 
     const payload = ocrDetectSchema.parse(await request.json());
@@ -162,7 +164,7 @@ export async function POST(request: NextRequest) {
         ip: clientIp,
         payload: { used: ipLimit.used, limit: OCR_DETECT_IP_LIMIT },
       });
-      return apiError("Trop de requetes OCR depuis cette IP. Reessayez plus tard.", 429);
+      return apiError("Too many OCR requests from this IP. Please try again later.", 429);
     }
 
     const userLimit = await consumeRateLimit({
@@ -177,7 +179,7 @@ export async function POST(request: NextRequest) {
         ip: clientIp,
         payload: { used: userLimit.used, limit: OCR_DETECT_USER_LIMIT },
       });
-      return apiError("Quota OCR horaire atteint. Reessayez plus tard.", 429);
+      return apiError("Hourly OCR quota reached. Please try again later.", 429);
     }
 
     const quotaConfig = getQuotaConfig("ocr_detect");
@@ -194,7 +196,7 @@ export async function POST(request: NextRequest) {
         ip: clientIp,
         payload: { reason: quota.reason, dayUsed: quota.dayUsed, monthUsed: quota.monthUsed },
       });
-      return apiError("Quota OCR atteint (jour/mois).", 429);
+      return apiError("OCR quota reached (day/month).", 429);
     }
 
     let imageUrl = payload.imageUrl ?? "";
@@ -210,13 +212,13 @@ export async function POST(request: NextRequest) {
           .from(OCR_BUCKET)
           .createSignedUrl(imageRef, SIGNED_URL_TTL_SECONDS);
         if (signed.error || !signed.data?.signedUrl) {
-          return apiError("Impossible de signer le fichier OCR prive.", 500);
+          return apiError("Unable to sign the private OCR file.", 500);
         }
         imageUrl = signed.data.signedUrl;
       }
     }
     if (!imageUrl) {
-      return apiError("imageUrl ou ocrImportId requis pour OCR.", 400);
+      return apiError("imageUrl or ocrImportId required for OCR.", 400);
     }
 
     let providerUsed: OCRProvider;
@@ -247,18 +249,33 @@ export async function POST(request: NextRequest) {
 
       if (!ocrSpaceOutcome.ok && !googleOutcome.ok) {
         throw new Error(
-          `Aucun provider OCR n'a fonctionne. OCR.space: ${ocrSpaceOutcome.error}. Google Vision: ${googleOutcome.error}.`,
+          `No OCR provider worked. OCR.space: ${ocrSpaceOutcome.error}. Google Vision: ${googleOutcome.error}.`,
         );
       }
 
-      const selected =
-        ocrSpaceOutcome.ok && googleOutcome.ok
-          ? pickBestOutcome(ocrSpaceOutcome, googleOutcome)
-          : (ocrSpaceOutcome.ok ? ocrSpaceOutcome : googleOutcome) as ProviderOutcomeSuccess;
+      const bothOk = ocrSpaceOutcome.ok && googleOutcome.ok;
+      const selected = bothOk
+        ? pickBestOutcome(ocrSpaceOutcome, googleOutcome)
+        : (ocrSpaceOutcome.ok ? ocrSpaceOutcome : googleOutcome) as ProviderOutcomeSuccess;
 
       providerUsed = selected.provider;
       ocrResult = selected.ocrResult;
-      postprocessed = selected.postprocessed;
+
+      if (bothOk) {
+        // Token-level fusion: upgrade chords the winning provider missed but the
+        // other recognized, then rebuild the lines from the fused tokens.
+        const donor =
+          selected === ocrSpaceOutcome ? googleOutcome : ocrSpaceOutcome;
+        const fusedTokens = fuseProviderTokens(
+          selected.postprocessed.tokens,
+          donor.postprocessed.tokens,
+        );
+        postprocessed = rebuildOCRResult(fusedTokens, {
+          chordsOnly: payload.chordsOnly,
+        });
+      } else {
+        postprocessed = selected.postprocessed;
+      }
 
       comparison = {
         mode: "auto.compare",
@@ -312,15 +329,14 @@ export async function POST(request: NextRequest) {
     if (error instanceof ZodError) return apiValidationError(error);
     if (
       error instanceof Error &&
-      (error.message.includes("OCR non configur") ||
-        error.message.includes("OCR non configure") ||
-        error.message.includes("Google Vision PDF async non configure"))
+      (error.message.includes("OCR not configured") ||
+        error.message.includes("Google Vision async PDF not configured"))
     ) {
       return apiError(error.message, 503);
     }
     if (error instanceof Error && isRecoverableOCRInputError(error.message)) {
       return apiError(error.message, 422);
     }
-    return handleApiError(error, "Erreur endpoint OCR detect");
+    return handleApiError(error, "OCR detect endpoint error");
   }
 }

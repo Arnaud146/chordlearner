@@ -22,15 +22,15 @@ export default async function OcrReviewPage({ params }: OcrReviewPageProps) {
         <p
           className={`${optionBClassNames.body} text-xs font-semibold uppercase tracking-[0.14em] text-[var(--song-text-subtle)]`}
         >
-          Relecture OCR
+          OCR review
         </p>
         <h1
           className={`${optionBClassNames.display} text-5xl leading-[0.95] font-bold text-[var(--song-text)] md:text-6xl`}
         >
-          Import intelligent accords/paroles
+          Smart import: chords/lyrics
         </h1>
         <p className={`${optionBClassNames.body} text-base text-[var(--song-text-muted)] md:text-lg`}>
-          Morceau: {songId}
+          Song: {songId}
         </p>
       </div>
       <OCRReviewWorkspace

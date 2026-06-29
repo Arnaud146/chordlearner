@@ -40,6 +40,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: result });
   } catch (error) {
-    return handleApiError(error, "Erreur endpoint OCR finalize");
+    return handleApiError(error, "OCR finalize endpoint error");
   }
 }

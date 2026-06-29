@@ -7,7 +7,7 @@ interface ChordBadgesProps {
 
 export function ChordBadges({ chords }: ChordBadgesProps) {
   if (chords.length === 0) {
-    return <p className="text-sm text-muted-foreground">Aucun accord detecte.</p>;
+    return <p className="text-sm text-muted-foreground">No chord detected.</p>;
   }
 
   return (

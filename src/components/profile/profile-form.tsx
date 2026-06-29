@@ -25,10 +25,10 @@ function normalizeFullName(value: string): string | null {
 async function parseApiResponse<T>(response: Response): Promise<T> {
   const payload = (await response.json()) as { data?: T; error?: string };
   if (!response.ok) {
-    throw new Error(payload.error ?? "Une erreur est survenue");
+    throw new Error(payload.error ?? "An error occurred");
   }
   if (!payload.data) {
-    throw new Error("Reponse API invalide");
+    throw new Error("Invalid API response");
   }
   return payload.data;
 }
@@ -74,10 +74,10 @@ export function ProfileForm({ initialDisplayName, initialFullName }: ProfileForm
       setSavedFullName(updatedProfile.fullName ?? "");
       setDisplayName(updatedProfile.displayName);
       setFullName(updatedProfile.fullName ?? "");
-      setSuccessMessage("Profil mis a jour.");
+      setSuccessMessage("Profile updated.");
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Impossible de mettre a jour le profil.",
+        error instanceof Error ? error.message : "Unable to update the profile.",
       );
     } finally {
       setIsSubmitting(false);
@@ -95,20 +95,20 @@ export function ProfileForm({ initialDisplayName, initialFullName }: ProfileForm
 
       {errorMessage ? (
         <Alert variant="destructive">
-          <AlertTitle>Erreur</AlertTitle>
+          <AlertTitle>Error</AlertTitle>
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="profile-display-name" className={`${optionBClassNames.body} text-[var(--song-text)]`}>
-          Pseudo
+          Username
         </Label>
         <Input
           id="profile-display-name"
           value={displayName}
           onChange={(event) => setDisplayName(event.target.value)}
-          placeholder="Exemple: ArnaudPiano"
+          placeholder="Example: ArnaudPiano"
           minLength={2}
           maxLength={40}
           disabled={isSubmitting}
@@ -119,13 +119,13 @@ export function ProfileForm({ initialDisplayName, initialFullName }: ProfileForm
 
       <div className="space-y-2">
         <Label htmlFor="profile-full-name" className={`${optionBClassNames.body} text-[var(--song-text)]`}>
-          Nom complet (optionnel)
+          Full name (optional)
         </Label>
         <Input
           id="profile-full-name"
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
-          placeholder="Exemple: Arnaud Dupont"
+          placeholder="Example: Arnaud Dupont"
           maxLength={80}
           disabled={isSubmitting}
           className={`${optionBClassNames.body} rounded-xl border-[var(--song-border)] bg-[var(--song-surface-soft)]`}
@@ -137,7 +137,7 @@ export function ProfileForm({ initialDisplayName, initialFullName }: ProfileForm
         disabled={isSubmitting || !hasChanges}
         className={`${optionBClassNames.body} rounded-xl bg-[var(--song-accent)] px-5 font-semibold text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent)]/90`}
       >
-        {isSubmitting ? "Enregistrement..." : "Enregistrer"}
+        {isSubmitting ? "Saving..." : "Save"}
       </Button>
     </form>
   );

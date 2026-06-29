@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { compressImage } from "@/lib/utils/image-compress";
+import { preprocessImageForOCR } from "@/lib/utils/image-compress";
 import type { ChordExtractionResult, StructuredSong } from "@/types/chords";
 
 interface OCRTokenReviewItem {
@@ -131,10 +131,10 @@ export function OCRReviewWorkspace({
   const hiddenTokenCount = Math.max(tokens.length - visibleTokens.length, 0);
   const detectingLabel =
     provider === "auto.compare"
-      ? "Comparaison OCR en cours..."
+      ? "Comparing OCR providers..."
       : provider === "google.vision"
-        ? "Analyse Google Vision en cours..."
-        : "Analyse OCR.space en cours...";
+        ? "Analyzing with Google Vision..."
+        : "Analyzing with OCR.space...";
 
   async function handleWebExtraction() {
     setIsWebExtracting(true);
@@ -156,7 +156,7 @@ export function OCRReviewWorkspace({
         error?: string;
       };
       if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "Echec extraction web");
+        throw new Error(payload.error ?? "Web extraction failed");
       }
 
       setWebResult(payload.data);
@@ -170,7 +170,7 @@ export function OCRReviewWorkspace({
       }
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Impossible de lancer extraction web",
+        error instanceof Error ? error.message : "Unable to start web extraction",
       );
     } finally {
       setIsWebExtracting(false);
@@ -182,7 +182,7 @@ export function OCRReviewWorkspace({
     setErrorMessage(null);
     try {
       const uploadFile = file.type.startsWith("image/")
-        ? await compressImage(file)
+        ? await preprocessImageForOCR(file)
         : file;
 
       const formData = new FormData();
@@ -198,14 +198,14 @@ export function OCRReviewWorkspace({
         error?: string;
       };
       if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "Echec de l'upload");
+        throw new Error(payload.error ?? "Upload failed");
       }
       setImageUrl(payload.data.imageUrl);
       setOCRImportId(payload.data.ocrImportId);
       setSourceMode("ocr");
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Erreur pendant l'upload",
+        error instanceof Error ? error.message : "Error during upload",
       );
     } finally {
       setIsUploading(false);
@@ -238,7 +238,7 @@ export function OCRReviewWorkspace({
         error?: string;
       };
       if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "Echec de detection OCR");
+        throw new Error(payload.error ?? "OCR detection failed");
       }
       setOCRImportId(payload.data.ocrImportId);
       setLines(payload.data.lines);
@@ -250,7 +250,7 @@ export function OCRReviewWorkspace({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Impossible de lancer la detection OCR",
+          : "Unable to start OCR detection",
       );
     } finally {
       setIsDetecting(false);
@@ -281,14 +281,14 @@ export function OCRReviewWorkspace({
         error?: string;
       };
       if (!response.ok || !payload.data) {
-        throw new Error(payload.error ?? "Impossible de finaliser");
+        throw new Error(payload.error ?? "Unable to finalize");
       }
       window.location.href = `/songs/${payload.data.songId}`;
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Erreur pendant la finalisation OCR",
+          : "Error during OCR finalization",
       );
     } finally {
       setIsFinalizing(false);
@@ -311,12 +311,12 @@ export function OCRReviewWorkspace({
       <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
         <CardHeader className="space-y-3">
           <CardTitle className={`${optionBClassNames.display} text-4xl font-bold`}>
-            Import intelligent accords + paroles
+            Smart import: chords + lyrics
           </CardTitle>
           <div className="flex flex-wrap gap-2 text-xs">
-            <Badge variant="secondary">mode utilise: {creationMode}</Badge>
+            <Badge variant="secondary">mode used: {creationMode}</Badge>
             <Badge variant="outline">
-              statut: {webResult?.success ? "web ok" : tokens.length > 0 ? "ocr ok" : "en attente"}
+              status: {webResult?.success ? "web ok" : tokens.length > 0 ? "ocr ok" : "pending"}
             </Badge>
           </div>
         </CardHeader>
@@ -341,7 +341,7 @@ export function OCRReviewWorkspace({
 
               {webResult?.success && webResult.song ? (
                 <Button type="button" onClick={useWebResultForCreation}>
-                  Utiliser ce resultat pour creer la chanson
+                  Use this result to create the song
                 </Button>
               ) : null}
             </TabsContent>
@@ -350,18 +350,18 @@ export function OCRReviewWorkspace({
               <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface-soft)] shadow-[var(--song-shadow)]">
                 <CardHeader>
                   <CardTitle className={`${optionBClassNames.display} text-3xl font-bold`}>
-                    OCR assiste (OCR.space / Google Vision)
+                    Assisted OCR (OCR.space / Google Vision)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-[var(--song-text-muted)]">
-                    Utilisez OCR en fallback si la page web n&apos;est pas exploitable.
+                    Use OCR as a fallback if the web page can&apos;t be used.
                   </p>
 
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-end gap-3">
                       <div className="flex-1 space-y-2">
-                        <Label htmlFor="imageUrl">Image/PDF URL (ou uploader ci-dessous)</Label>
+                        <Label htmlFor="imageUrl">Image/PDF URL (or upload below)</Label>
                         <Input
                           id="imageUrl"
                           placeholder="https://..."
@@ -371,7 +371,7 @@ export function OCRReviewWorkspace({
                         />
                       </div>
                       <div className="w-full space-y-2 sm:w-64">
-                        <Label htmlFor="ocrProvider">Provider OCR</Label>
+                        <Label htmlFor="ocrProvider">OCR provider</Label>
                         <select
                           id="ocrProvider"
                           className="w-full rounded-xl border border-[var(--song-border)] bg-[var(--song-surface)] px-3 py-2 text-sm"
@@ -383,7 +383,7 @@ export function OCRReviewWorkspace({
                           <option value="ocr.space">OCR.space</option>
                           <option value="google.vision">Google Vision</option>
                           <option value="auto.compare">
-                            Comparaison auto (OCR.space + Google Vision)
+                            Auto compare (OCR.space + Google Vision)
                           </option>
                         </select>
                       </div>
@@ -391,7 +391,7 @@ export function OCRReviewWorkspace({
 
                     <div className="flex items-center gap-2 text-sm text-[var(--song-text-subtle)]">
                       <div className="h-px flex-1 bg-[var(--song-border)]" />
-                      <span>ou</span>
+                      <span>or</span>
                       <div className="h-px flex-1 bg-[var(--song-border)]" />
                     </div>
 
@@ -413,7 +413,7 @@ export function OCRReviewWorkspace({
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
                       >
-                        {isUploading ? "Upload en cours..." : "Uploader image ou PDF"}
+                        {isUploading ? "Uploading..." : "Upload image or PDF"}
                       </Button>
                     </div>
                   </div>
@@ -427,7 +427,7 @@ export function OCRReviewWorkspace({
                       className="h-4 w-4"
                     />
                     <Label htmlFor="chordsOnly" className="cursor-pointer">
-                      Extraire uniquement les accords reconnus
+                      Extract only recognized chords
                     </Label>
                   </div>
 
@@ -444,7 +444,7 @@ export function OCRReviewWorkspace({
                           {detectingLabel}
                         </span>
                       ) : (
-                        "Lancer OCR"
+                        "Run OCR"
                       )}
                     </Button>
                     <Link href={manualFallbackHref}>
@@ -453,7 +453,7 @@ export function OCRReviewWorkspace({
                         variant="outline"
                         className="rounded-xl border-[var(--song-border)] bg-[var(--song-surface-highlight)] text-[var(--song-text)] hover:bg-[var(--song-surface-muted)]"
                       >
-                        Saisie manuelle
+                        Manual entry
                       </Button>
                     </Link>
                   </div>
@@ -467,19 +467,19 @@ export function OCRReviewWorkspace({
                   {comparison ? (
                     <div className="rounded-xl border border-[var(--song-border)] bg-[var(--song-surface)] p-3 text-sm">
                       <p className="font-medium">
-                        Comparaison auto: provider retenu = {comparison.selectedProvider}
+                        Auto compare: chosen provider = {comparison.selectedProvider}
                       </p>
                       <p className="text-[var(--song-text-muted)]">
                         OCR.space:{" "}
                         {comparison.ocrSpace.ok
-                          ? `${comparison.ocrSpace.recognizedChordCount ?? 0} accords, ${comparison.ocrSpace.lineCount ?? 0} lignes`
-                          : `erreur (${comparison.ocrSpace.error ?? "inconnue"})`}
+                          ? `${comparison.ocrSpace.recognizedChordCount ?? 0} chords, ${comparison.ocrSpace.lineCount ?? 0} lines`
+                          : `error (${comparison.ocrSpace.error ?? "unknown"})`}
                       </p>
                       <p className="text-[var(--song-text-muted)]">
                         Google Vision:{" "}
                         {comparison.googleVision.ok
-                          ? `${comparison.googleVision.recognizedChordCount ?? 0} accords, ${comparison.googleVision.lineCount ?? 0} lignes`
-                          : `erreur (${comparison.googleVision.error ?? "inconnue"})`}
+                          ? `${comparison.googleVision.recognizedChordCount ?? 0} chords, ${comparison.googleVision.lineCount ?? 0} lines`
+                          : `error (${comparison.googleVision.error ?? "unknown"})`}
                       </p>
                     </div>
                   ) : null}
@@ -497,7 +497,7 @@ export function OCRReviewWorkspace({
                     <div className="space-y-3">
                       <p className="inline-flex items-center gap-2 text-sm text-[var(--song-text-muted)]">
                         <Loader2 className="size-4 animate-spin" />
-                        OCR en cours de traitement...
+                        OCR processing...
                       </p>
                       <div className="space-y-2">
                         {Array.from({ length: 6 }).map((_, index) => (
@@ -510,14 +510,14 @@ export function OCRReviewWorkspace({
                     </div>
                   ) : tokens.length === 0 ? (
                     <p className="text-sm text-[var(--song-text-muted)]">
-                      Lancez OCR pour voir les tokens detectes.
+                      Run OCR to see the detected tokens.
                     </p>
                   ) : (
                     <>
                       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--song-border-soft)] bg-[var(--song-bg)] px-3 py-2 text-xs">
                         <p className="text-[var(--song-text-muted)]">
-                          {tokenSummary.total} tokens - {tokenSummary.recognized} reconnus -{" "}
-                          {tokenSummary.suspect} douteux
+                          {tokenSummary.total} tokens - {tokenSummary.recognized} recognized -{" "}
+                          {tokenSummary.suspect} suspect
                         </p>
                         <Button
                           type="button"
@@ -528,10 +528,10 @@ export function OCRReviewWorkspace({
                           disabled={tokens.length <= 40}
                         >
                           {showAllTokens
-                            ? "Reduire"
+                            ? "Collapse"
                             : hiddenTokenCount > 0
-                              ? `Voir plus (${hiddenTokenCount})`
-                              : "Tous affiches"}
+                              ? `Show more (${hiddenTokenCount})`
+                              : "All shown"}
                         </Button>
                       </div>
                       <div className="max-h-[28rem] space-y-2 overflow-y-auto pr-1">
@@ -547,13 +547,13 @@ export function OCRReviewWorkspace({
                               variant={token.isChordRecognized ? "secondary" : "destructive"}
                               className="text-[10px]"
                             >
-                              {token.isChordRecognized ? "reconnu" : "inconnu"}
+                              {token.isChordRecognized ? "recognized" : "unknown"}
                             </Badge>
                             <Badge
                               variant={token.isSuspect ? "outline" : "secondary"}
                               className="text-[10px]"
                             >
-                              {token.isSuspect ? "douteux" : "fiable"}
+                              {token.isSuspect ? "suspect" : "reliable"}
                             </Badge>
                             <span className="text-[var(--song-text-subtle)]">
                               conf: {Math.round(token.confidence)}%
@@ -578,13 +578,13 @@ export function OCRReviewWorkspace({
       <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
         <CardHeader>
           <CardTitle className={`${optionBClassNames.display} text-3xl font-bold`}>
-            Texte valide (editable)
+            Validated text (editable)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {lines.length === 0 ? (
             <p className="text-sm text-[var(--song-text-muted)]">
-              Le texte extrait apparaitra ici apres analyse web ou OCR.
+              The extracted text will appear here after web or OCR analysis.
             </p>
           ) : (
             <Textarea
@@ -604,39 +604,39 @@ export function OCRReviewWorkspace({
       <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
         <CardHeader>
           <CardTitle className={`${optionBClassNames.display} text-3xl font-bold`}>
-            Creer la chanson depuis le resultat valide
+            Create the song from the validated result
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="ocrTitle">Titre</Label>
+              <Label htmlFor="ocrTitle">Title</Label>
               <Input
                 id="ocrTitle"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Ex : Mon morceau"
+                placeholder="e.g. My song"
                 className="rounded-xl border-[var(--song-border)] bg-[var(--song-surface-soft)]"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ocrArtist">Artiste</Label>
+              <Label htmlFor="ocrArtist">Artist</Label>
               <Input
                 id="ocrArtist"
                 value={artist}
                 onChange={(event) => setArtist(event.target.value)}
-                placeholder="Optionnel"
+                placeholder="Optional"
                 className="rounded-xl border-[var(--song-border)] bg-[var(--song-surface-soft)]"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="ocrOriginalKey">Tonalite d&apos;origine</Label>
+            <Label htmlFor="ocrOriginalKey">Original key</Label>
             <Input
               id="ocrOriginalKey"
               value={originalKey}
               onChange={(event) => setOriginalKey(event.target.value)}
-              placeholder="Optionnel (C, F#, Bb...)"
+              placeholder="Optional (C, F#, Bb...)"
               className="rounded-xl border-[var(--song-border)] bg-[var(--song-surface-soft)]"
             />
           </div>
@@ -649,7 +649,7 @@ export function OCRReviewWorkspace({
             className="rounded-xl bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent)]/90"
             disabled={isFinalizing || !title.trim() || !validatedText}
           >
-            {isFinalizing ? "Finalisation..." : "Valider et creer la chanson"}
+            {isFinalizing ? "Finalizing..." : "Validate and create the song"}
           </Button>
         </CardContent>
       </Card>

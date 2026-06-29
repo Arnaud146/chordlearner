@@ -1,5 +1,6 @@
 import { normalizeChordSymbol } from "../chords/chord-normalizer";
 import { suggestChordCorrection } from "./ocr-correction-suggest";
+import { recoverDroppedSharps, mergeAdjacentSlashBass } from "./ocr-sharp-recovery";
 
 export interface OCRTokenCandidate {
   text: string;
@@ -53,6 +54,128 @@ function sanitizeOCRTokenText(value: string): string {
 
 function isAdjacentToken(a: OCRTokenCandidate, b: OCRTokenCandidate): boolean {
   return a.lineIndex === b.lineIndex && b.wordIndex === a.wordIndex + 1;
+}
+
+const GLYPH_RUN_GAP_RATIO = 0.4;
+
+/**
+ * Horizontal gap between two same-line tokens (start of `b` minus end of `a`).
+ * Returns null when coordinates are missing. Identical/overlapping boxes give a
+ * negative gap.
+ */
+function horizontalGap(
+  a: OCRTokenCandidate,
+  b: OCRTokenCandidate,
+): number | null {
+  if (a.lineIndex !== b.lineIndex) return null;
+  if (!hasValidNumber(a.x) || !hasValidNumber(a.width) || !hasValidNumber(b.x)) {
+    return null;
+  }
+  return b.x - (a.x + a.width);
+}
+
+function glyphRunGapLimit(token: OCRTokenCandidate): number {
+  const height = hasValidNumber(token.height) ? token.height : 16;
+  return Math.max(2, height * GLYPH_RUN_GAP_RATIO);
+}
+
+function unionBox(tokens: OCRTokenCandidate[]): Partial<OCRTokenCandidate> {
+  const xs = tokens.filter((t) => hasValidNumber(t.x)).map((t) => t.x as number);
+  const ys = tokens.filter((t) => hasValidNumber(t.y)).map((t) => t.y as number);
+  if (xs.length === 0 || ys.length === 0) return {};
+  const rights = tokens
+    .filter((t) => hasValidNumber(t.x) && hasValidNumber(t.width))
+    .map((t) => (t.x as number) + (t.width as number));
+  const bottoms = tokens
+    .filter((t) => hasValidNumber(t.y) && hasValidNumber(t.height))
+    .map((t) => (t.y as number) + (t.height as number));
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return {
+    x,
+    y,
+    width: rights.length ? Math.max(...rights) - x : undefined,
+    height: bottoms.length ? Math.max(...bottoms) - y : undefined,
+  };
+}
+
+/**
+ * Both OCR providers can fragment one chord into per-glyph tokens, e.g. "D#m/A#"
+ * arrives as D # m / A #. OCR.space gives them an identical bounding box; Google
+ * Vision gives adjacent, touching boxes (~0-1px apart) — far tighter than the
+ * 3-5px gaps between real words. Reassemble runs of touching same-line tokens,
+ * but only commit a merge when the concatenation is a valid chord, so lyrics
+ * (e.g. "your"+"mind") are never glued together.
+ */
+function mergeGlyphRunTokens(candidates: OCRTokenCandidate[]): OCRTokenCandidate[] {
+  const sorted = [...candidates].sort((a, b) =>
+    a.lineIndex === b.lineIndex
+      ? a.wordIndex - b.wordIndex
+      : a.lineIndex - b.lineIndex,
+  );
+
+  const result: OCRTokenCandidate[] = [];
+  let index = 0;
+
+  while (index < sorted.length) {
+    let runEnd = index + 1;
+    while (runEnd < sorted.length) {
+      const gap = horizontalGap(sorted[runEnd - 1], sorted[runEnd]);
+      if (gap === null || gap >= glyphRunGapLimit(sorted[runEnd - 1])) break;
+      runEnd += 1;
+    }
+
+    const run = sorted.slice(index, runEnd);
+    if (run.length === 1) {
+      result.push(run[0]);
+      index = runEnd;
+      continue;
+    }
+
+    // Merge the longest prefix of the run that forms a valid chord.
+    let mergedCount = 0;
+    for (let k = run.length; k >= 2; k -= 1) {
+      const joined = run.slice(0, k).map((t) => t.text).join("");
+      if (normalizeChordSymbol(sanitizeOCRTokenText(joined)).isSupported) {
+        result.push({
+          ...run[0],
+          text: joined,
+          confidence: Math.min(...run.slice(0, k).map((t) => t.confidence)),
+          ...unionBox(run.slice(0, k)),
+        });
+        mergedCount = k;
+        break;
+      }
+    }
+
+    if (mergedCount === 0 && run.length >= 3) {
+      // Prefix failed — try skipping the first glyph (leading noise) and
+      // merging the remainder as a chord.
+      for (let k = run.length - 1; k >= 2; k -= 1) {
+        const joined = run.slice(1, 1 + k).map((t) => t.text).join("");
+        if (normalizeChordSymbol(sanitizeOCRTokenText(joined)).isSupported) {
+          result.push(run[0]);
+          result.push({
+            ...run[1],
+            text: joined,
+            confidence: Math.min(...run.slice(1, 1 + k).map((t) => t.confidence)),
+            ...unionBox(run.slice(1, 1 + k)),
+          });
+          result.push(...run.slice(1 + k));
+          mergedCount = -1;
+          break;
+        }
+      }
+    }
+    if (mergedCount === 0) {
+      result.push(...run);
+    } else if (mergedCount > 0) {
+      result.push(...run.slice(mergedCount));
+    }
+    index = runEnd;
+  }
+
+  return result;
 }
 
 function hasValidNumber(value: number | undefined): value is number {
@@ -285,7 +408,8 @@ export function postprocessOCRTokens(
   candidates: OCRTokenCandidate[],
   options?: OCRPostprocessOptions,
 ): OCRPostprocessResult {
-  const mergedCandidates = mergeSplitSlashChords(candidates);
+  const glyphMergedCandidates = mergeGlyphRunTokens(candidates);
+  const mergedCandidates = mergeSplitSlashChords(glyphMergedCandidates);
 
   const reviewedTokens: OCRTokenReviewItem[] = mergedCandidates.map((candidate) => {
     const sanitizedText = sanitizeOCRTokenText(candidate.text);
@@ -296,7 +420,10 @@ export function postprocessOCRTokens(
     const resolvedText = parsed.isSupported
       ? parsed.normalizedChordSymbol
       : correctionSuggestion ?? sanitizedText;
-    const isSuspect = candidate.confidence < 70 || !isChordRecognized || autoCorrected;
+    // A confidence of 0 means the provider didn't report one (OCR.space engine 2
+    // overlay, reassembled glyphs), not low confidence — don't flag on that alone.
+    const lowConfidence = candidate.confidence > 0 && candidate.confidence < 70;
+    const isSuspect = lowConfidence || !isChordRecognized || autoCorrected;
 
     return {
       text: resolvedText || candidate.text,
@@ -316,12 +443,32 @@ export function postprocessOCRTokens(
     };
   });
 
+  const sharpCorrected = recoverDroppedSharps(reviewedTokens);
+  const correctedTokens = mergeAdjacentSlashBass(sharpCorrected);
+
   if (options?.chordsOnly) {
-    return buildChordOnlyLines(reviewedTokens);
+    return buildChordOnlyLines(correctedTokens);
   }
 
   return {
-    lines: buildLineStringsFromTokens(reviewedTokens),
-    tokens: reviewedTokens,
+    lines: buildLineStringsFromTokens(correctedTokens),
+    tokens: correctedTokens,
+  };
+}
+
+/**
+ * Rebuilds lines from an already-reviewed token list (e.g. after provider fusion
+ * upgraded some token texts), without re-running the correction passes.
+ */
+export function rebuildOCRResult(
+  tokens: OCRTokenReviewItem[],
+  options?: OCRPostprocessOptions,
+): OCRPostprocessResult {
+  if (options?.chordsOnly) {
+    return buildChordOnlyLines(tokens);
+  }
+  return {
+    lines: buildLineStringsFromTokens(tokens),
+    tokens,
   };
 }

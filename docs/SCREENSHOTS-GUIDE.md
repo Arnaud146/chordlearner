@@ -81,7 +81,7 @@ export CHORDLEARNER_SONG_ID=votre-uuid-morceau
 npm run screenshots
 ```
 
-Variables optionnelles : `CHORDLEARNER_OCR_REVIEW_QUERY`, `CHORDLEARNER_BASE_URL`, `CHORDLEARNER_SCREENSHOT_DIR` — voir [`scripts/capture-screenshots.mjs`](../scripts/capture-screenshots.mjs).
+Variables optionnelles : `CHORDLEARNER_OCR_REVIEW_QUERY`, `CHORDLEARNER_BASE_URL`, `CHORDLEARNER_SCREENSHOT_DIR` — voir [`scripts/capture-screenshots.mjs`](../scripts/capture-screenshots.mjs). Si le serveur tourne sur un autre port (ex. 3001) : `CHORDLEARNER_BASE_URL=http://localhost:3001`
 
 ## Fichiers à ne pas versionner (optionnel)
 

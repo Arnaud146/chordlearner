@@ -9,7 +9,6 @@ import {
 import { FingeringHintBadge } from "@/components/fingering-hint-badge";
 import { InversionSelector } from "@/components/inversion-selector";
 import { KeySelector } from "@/components/key-selector";
-import { LoadingStateCard } from "@/components/loading-state-card";
 import { PianoKeyboardVisualizer } from "@/components/piano-keyboard-visualizer";
 import { PresetConfigurator } from "@/components/preset-configurator";
 import { PresetOverview } from "@/components/preset-overview";
@@ -32,19 +31,25 @@ import type {
 
 interface SongDetailContentProps {
   song: SongRow;
+  initialOccurrences: ChordOccurrenceRow[];
+  initialUniqueChords: UniqueChordRow[];
 }
 
 async function fetchApiData<T>(url: string): Promise<T> {
   const response = await fetch(url);
   const payload = (await response.json()) as { data?: T; error?: string };
-  if (!response.ok) throw new Error(payload.error ?? "Erreur API");
-  if (!payload.data) throw new Error("Reponse API invalide");
+  if (!response.ok) throw new Error(payload.error ?? "API error");
+  if (!payload.data) throw new Error("Invalid API response");
   return payload.data;
 }
 
-export function SongDetailContent({ song }: SongDetailContentProps) {
-  const [baseOccurrences, setBaseOccurrences] = useState<ChordOccurrenceRow[]>([]);
-  const [baseUniqueChords, setBaseUniqueChords] = useState<UniqueChordRow[]>([]);
+export function SongDetailContent({
+  song,
+  initialOccurrences,
+  initialUniqueChords,
+}: SongDetailContentProps) {
+  const [baseOccurrences] = useState<ChordOccurrenceRow[]>(initialOccurrences);
+  const [baseUniqueChords] = useState<UniqueChordRow[]>(initialUniqueChords);
   const [voicingOptions, setVoicingOptions] = useState<ChordVoicingOptionRow[]>([]);
   const [selectedVoicingOptionId, setSelectedVoicingOptionId] = useState<
     string | null
@@ -60,8 +65,6 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
   const [saveStatus, setSaveStatus] = useState<
     "saved" | "saving" | "error"
   >("saved");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     "accords" | "configurer" | "overview"
   >("accords");
@@ -90,41 +93,6 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
       transposeNoticeTimeoutRef.current = null;
     }, 2600);
   }
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [occData, uniqData] = await Promise.all([
-          fetchApiData<ChordOccurrenceRow[]>(
-            `/api/songs/${song.id}/chords/occurrences`,
-          ),
-          fetchApiData<UniqueChordRow[]>(`/api/songs/${song.id}/chords/unique`),
-        ]);
-        if (cancelled) return;
-        setBaseOccurrences(occData);
-        setBaseUniqueChords(uniqData);
-      } catch (loadError) {
-        if (cancelled) return;
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Impossible de charger la grille",
-        );
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [song.id]);
 
   useEffect(() => {
     return () => {
@@ -239,15 +207,16 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
           handMode: "RH",
         });
 
-        const voicingResponse = await fetchApiData<{
-          options: ChordVoicingOptionRow[];
-          defaultVoicingOptionId: string | null;
-        }>(`/api/songs/${song.id}/voicings?${query.toString()}`);
-
-        const selectionResponse = await fetchApiData<{
-          selection: UserVoicingSelectionRow;
-          defaultVoicingOptionId: string | null;
-        }>(`/api/songs/${song.id}/voicings/selection?${query.toString()}`);
+        const [voicingResponse, selectionResponse] = await Promise.all([
+          fetchApiData<{
+            options: ChordVoicingOptionRow[];
+            defaultVoicingOptionId: string | null;
+          }>(`/api/songs/${song.id}/voicings?${query.toString()}`),
+          fetchApiData<{
+            selection: UserVoicingSelectionRow;
+            defaultVoicingOptionId: string | null;
+          }>(`/api/songs/${song.id}/voicings/selection?${query.toString()}`),
+        ]);
 
         if (cancelled) return;
         setVoicingOptions(voicingResponse.options);
@@ -320,7 +289,7 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
         error?: string;
       };
       if (!response.ok) {
-        throw new Error(payload.error ?? "Impossible de sauvegarder le voicing");
+        throw new Error(payload.error ?? "Unable to save the voicing");
       }
       setSaveStatus("saved");
     } catch {
@@ -347,14 +316,14 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
         error?: string;
       };
       if (!response.ok || !payload.data?.song) {
-        throw new Error(payload.error ?? "Impossible de transposer le morceau");
+        throw new Error(payload.error ?? "Unable to transpose the song");
       }
       setCurrentKey(payload.data.song.current_key);
       setNotationPreference(payload.data.song.notation_preference);
       setSaveStatus("saved");
       showTransposeNotice(
         "success",
-        `Transposition appliquee en ${payload.data.song.current_key ?? toKey}.`,
+        `Transposition applied in ${payload.data.song.current_key ?? toKey}.`,
       );
     } catch (error) {
       setSaveStatus("error");
@@ -362,7 +331,7 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
         "error",
         error instanceof Error
           ? error.message
-          : "La transposition a echoue. Reessaie dans quelques secondes.",
+          : "Transposition failed. Try again in a few seconds.",
       );
     }
   }
@@ -378,9 +347,9 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
   }
 
   const tabs = [
-    { id: "accords" as const, label: "Accords" },
-    { id: "configurer" as const, label: "Configurer un plan" },
-    { id: "overview" as const, label: "Vue d'ensemble" },
+    { id: "accords" as const, label: "Chords" },
+    { id: "configurer" as const, label: "Configure a plan" },
+    { id: "overview" as const, label: "Overview" },
   ];
 
   return (
@@ -395,20 +364,20 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
             {song.title}
           </h1>
           <p className={`${optionBClassNames.body} text-lg text-[var(--song-text-muted)]`}>
-            {song.artist ?? "Artiste inconnu"}
+            {song.artist ?? "Unknown artist"}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge
               variant="outline"
               className={`${optionBClassNames.body} rounded-full border-[var(--song-border)] bg-[var(--song-surface-soft)] text-[var(--song-text-muted)]`}
             >
-              Tonalite actuelle: {currentKey ?? "Non definie"}
+              Current key: {currentKey ?? "Not set"}
             </Badge>
             <Badge
               variant="outline"
               className={`${optionBClassNames.body} rounded-full border-[var(--song-border)] bg-[var(--song-surface-soft)] text-[var(--song-text-muted)]`}
             >
-              Notation : {notationPreference}
+              Notation: {notationPreference}
             </Badge>
           </div>
         </div>
@@ -446,108 +415,84 @@ export function SongDetailContent({ song }: SongDetailContentProps) {
         ))}
       </div>
 
-      {error && activeTab === "accords" ? (
-        <div className="rounded-xl border border-[var(--song-danger-border)] bg-[var(--song-danger-surface)] px-4 py-3 shadow-[var(--song-shadow)]">
-          <p className={`${optionBClassNames.body} text-sm font-semibold text-[var(--song-danger)]`}>
-            {error}
-          </p>
-        </div>
-      ) : null}
-
       {activeTab === "accords" ? (
         <div className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr]">
-            {loading ? (
-              <>
-                <LoadingStateCard label="Chargement du piano..." lines={2} />
-                <LoadingStateCard label="Chargement des renversements..." lines={3} />
-              </>
-            ) : (
-              <>
-                <PianoKeyboardVisualizer
-                  activeNotesMidi={selectedVoicing?.notes_midi ?? []}
-                  slashBassMidi={selectedSlashBassMidi}
-                  emphasis="normal"
-                />
-                <InversionSelector
-                  options={voicingOptions.map((option) => ({
-                    inversionIndex: option.inversion_index,
-                    label: option.voicing_label,
-                  }))}
-                  selectedInversionIndex={selectedInversionIndex}
-                  onSelectInversion={handleSelectInversion}
-                />
-              </>
-            )}
+            <PianoKeyboardVisualizer
+              activeNotesMidi={selectedVoicing?.notes_midi ?? []}
+              slashBassMidi={selectedSlashBassMidi}
+              slashBassNote={selectedInfo?.slash_bass ?? null}
+              chordLabel={selectedInfo?.normalized_chord_symbol ?? null}
+              emphasis="normal"
+            />
+            <InversionSelector
+              options={voicingOptions.map((option) => ({
+                inversionIndex: option.inversion_index,
+                label: option.voicing_label,
+              }))}
+              selectedInversionIndex={selectedInversionIndex}
+              onSelectInversion={handleSelectInversion}
+            />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
             <div className="space-y-6">
-              {loading ? (
-                <LoadingStateCard label="Chargement des accords..." lines={4} />
-              ) : (
-                <UniqueChordList
-                  chords={uniqueChords}
-                  selectedChordSymbol={selectedChordSymbol}
-                  onSelectChord={setSelectedChordSymbol}
-                />
-              )}
+              <UniqueChordList
+                chords={uniqueChords}
+                selectedChordSymbol={selectedChordSymbol}
+                onSelectChord={setSelectedChordSymbol}
+              />
               <KeySelector
                 currentKey={currentKey}
                 originalKey={song.original_key}
                 notationPreference={notationPreference}
                 onSelectKey={handleTranspose}
-                disabled={loading}
               />
             </div>
 
             <div className="space-y-6">
-              {loading ? (
-                <LoadingStateCard label="Preparation des voicings..." lines={3} />
-              ) : (
-                <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
-                  <CardHeader>
-                    <CardTitle
-                      className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}
-                    >
-                      Accord selectionne
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent
-                    className={`${optionBClassNames.body} space-y-2 text-sm text-[var(--song-text)]`}
+              <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
+                <CardHeader>
+                  <CardTitle
+                    className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}
                   >
-                    {selectedInfo ? (
-                      <>
-                        <p>
-                          <span className="font-medium">Symbole :</span>{" "}
-                          {selectedInfo.normalized_chord_symbol}
-                        </p>
-                        <p>
-                          <span className="font-medium">Occurrences :</span>{" "}
-                          {selectedInfo.occurrence_count}
-                        </p>
-                        <p>
-                          <span className="font-medium">Support :</span>{" "}
-                          {selectedInfo.is_supported ? "Oui" : "Non"}
-                        </p>
-                        {selectedInfo.slash_bass ? (
-                          <p>
-                            <span className="font-medium">Basse imposee :</span>{" "}
-                            {selectedInfo.slash_bass}
-                          </p>
-                        ) : null}
-                        {selectedVoicing ? (
-                          <FingeringHintBadge fingering={selectedFingering} />
-                        ) : null}
-                      </>
-                    ) : (
-                      <p className="text-[var(--song-text-subtle)]">
-                        Selectionne un accord dans la liste.
+                    Selected chord
+                  </CardTitle>
+                </CardHeader>
+                <CardContent
+                  className={`${optionBClassNames.body} space-y-2 text-sm text-[var(--song-text)]`}
+                >
+                  {selectedInfo ? (
+                    <>
+                      <p>
+                        <span className="font-medium">Symbol:</span>{" "}
+                        {selectedInfo.normalized_chord_symbol}
                       </p>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                      <p>
+                        <span className="font-medium">Occurrences:</span>{" "}
+                        {selectedInfo.occurrence_count}
+                      </p>
+                      <p>
+                        <span className="font-medium">Support:</span>{" "}
+                        {selectedInfo.is_supported ? "Yes" : "No"}
+                      </p>
+                      {selectedInfo.slash_bass ? (
+                        <p>
+                          <span className="font-medium">Required bass:</span>{" "}
+                          {selectedInfo.slash_bass}
+                        </p>
+                      ) : null}
+                      {selectedVoicing ? (
+                        <FingeringHintBadge fingering={selectedFingering} />
+                      ) : null}
+                    </>
+                  ) : (
+                    <p className="text-[var(--song-text-subtle)]">
+                      Select a chord from the list.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

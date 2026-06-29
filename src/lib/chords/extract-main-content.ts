@@ -1,6 +1,6 @@
 import { extractChordTokens } from "./chord-regex";
 
-export interface MainContentBlock {
+interface MainContentBlock {
   tag: string;
   attributes: string;
   lines: string[];
@@ -154,7 +154,7 @@ function buildSnippet(lines: string[]): string {
   return lines.join(" | ").slice(0, 220);
 }
 
-export function extractDocumentTitle(html: string): string | null {
+function extractDocumentTitle(html: string): string | null {
   const titleMatch = html.match(/<\s*title[^>]*>([\s\S]*?)<\s*\/\s*title\s*>/i);
   if (!titleMatch?.[1]) return null;
   const title = decodeHtmlEntities(titleMatch[1].replace(/\s+/g, " ").trim());

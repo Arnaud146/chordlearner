@@ -20,5 +20,3 @@ export function sanitizeRedirectPath(
   }
   return redirectPath;
 }
-
-export { DEFAULT_REDIRECT_PATH };

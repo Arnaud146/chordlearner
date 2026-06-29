@@ -25,12 +25,12 @@ export async function ensureVoicingOptionsForChord(params: {
   if (existing.length > 0) return existing;
 
   if (params.handMode !== "RH") {
-    throw new Error("Hand mode BH non implémenté pour le moment");
+    throw new Error("BH hand mode not implemented yet");
   }
 
   const generated = generateRightHandVoicings(params.chord);
   if (generated.length === 0) {
-    throw new Error("Impossible de générer des voicings pour cet accord");
+    throw new Error("Unable to generate voicings for this chord");
   }
 
   const rows: ChordVoicingOptionInsert[] = generated.map((option) => ({

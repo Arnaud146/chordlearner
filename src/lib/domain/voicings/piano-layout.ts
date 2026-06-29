@@ -29,7 +29,7 @@ const NATURAL_TO_MIDI: Record<string, number> = {
   B: 11,
 };
 
-export function noteToPitchClass(note: string): number {
+function noteToPitchClass(note: string): number {
   const trimmed = note.trim();
   const match = trimmed.match(/^([A-G])([#b]?)$/);
   if (!match) {
@@ -44,7 +44,7 @@ export function noteToMidi(note: string, octave: number): number {
   return 12 * (octave + 1) + noteToPitchClass(note);
 }
 
-export function midiToNote(midi: number): string {
+function midiToNote(midi: number): string {
   const pitchClass = ((midi % 12) + 12) % 12;
   return NOTE_ORDER[pitchClass];
 }

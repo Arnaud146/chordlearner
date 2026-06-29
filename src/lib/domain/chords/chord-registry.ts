@@ -43,6 +43,16 @@ const QUALITY_RULES: QualityRule[] = [
     normalizedSuffix: "add9",
   },
   {
+    canonical: "half-diminished",
+    aliases: [/^m7b5$/i, /^min7b5$/i, /^ø7?$/],
+    normalizedSuffix: "m7b5",
+  },
+  {
+    canonical: "diminished7",
+    aliases: [/^dim7$/i],
+    normalizedSuffix: "dim7",
+  },
+  {
     canonical: "diminished",
     aliases: [/^dim$/i],
     normalizedSuffix: "dim",
@@ -68,6 +78,14 @@ const QUALITY_RULES: QualityRule[] = [
     normalizedSuffix: "",
   },
 ];
+
+/**
+ * Canonical normalized suffixes for every supported quality (e.g. "", "m", "maj7").
+ * Used to enumerate the valid chord vocabulary for OCR dictionary correction.
+ */
+export const NORMALIZED_QUALITY_SUFFIXES: string[] = QUALITY_RULES.map(
+  (rule) => rule.normalizedSuffix,
+);
 
 export function getQualityFromSuffix(
   rawSuffix: string,
@@ -104,10 +122,7 @@ export function normalizeNote(value: string): string | null {
 export function toSharp(note: string): string {
   const map: Record<string, string> = {
     Db: "C#",
-    Eb: "D#",
     Gb: "F#",
-    Ab: "G#",
-    Bb: "A#",
   };
   return map[note] ?? note;
 }

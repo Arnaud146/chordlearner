@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { AppNavbar } from "@/components/app-navbar";
+import { optionBBodyFont } from "@/components/option-b/theme";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
@@ -20,22 +10,22 @@ export const metadata: Metadata = {
     default: "ChordLearner",
     template: "%s | ChordLearner",
   },
-  description: "Apprends le piano a partir de tes grilles d'accords.",
+  description: "Learn the piano from your chord charts.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "ChordLearner",
-    description: "Apprends le piano a partir de tes grilles d'accords.",
+    description: "Learn the piano from your chord charts.",
     type: "website",
     url: "/",
-    locale: "fr_FR",
+    locale: "en_US",
     siteName: "ChordLearner",
   },
   twitter: {
     card: "summary_large_image",
     title: "ChordLearner",
-    description: "Apprends le piano a partir de tes grilles d'accords.",
+    description: "Learn the piano from your chord charts.",
   },
 };
 
@@ -55,15 +45,15 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="fr">
+    <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[#f8f4ea]`}
+        className={`${optionBBodyFont.variable} font-sans antialiased bg-[var(--song-bg)]`}
       >
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-zinc-900 focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-zinc-50"
         >
-          Aller au contenu principal
+          Skip to main content
         </a>
         <AppNavbar userEmail={userEmail} />
         <main id="main-content" className="mx-auto w-full max-w-6xl px-6 py-8">

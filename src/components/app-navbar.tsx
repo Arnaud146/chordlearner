@@ -1,11 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { headers } from "next/headers";
+import { AppNavbarSignOutButton } from "@/components/app-navbar-sign-out-button";
 import { optionBBodyFont, optionBClassNames, optionBDisplayFont } from "@/components/option-b/theme";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -14,9 +10,9 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/songs", label: "Morceaux" },
-  { href: "/songs/new", label: "Nouveau" },
-  { href: "/profil", label: "Profil" },
+  { href: "/songs", label: "Songs" },
+  { href: "/songs/new", label: "New" },
+  { href: "/profil", label: "Profile" },
 ];
 
 function isActivePath(pathname: string, href: string): boolean {
@@ -33,28 +29,14 @@ interface AppNavbarProps {
   userEmail: string | null;
 }
 
-export function AppNavbar({ userEmail }: AppNavbarProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  async function handleSignOut() {
-    try {
-      setIsSigningOut(true);
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      router.replace("/login");
-      router.refresh();
-    } finally {
-      setIsSigningOut(false);
-    }
-  }
+export async function AppNavbar({ userEmail }: AppNavbarProps) {
+  const pathname = (await headers()).get("x-pathname") ?? "/";
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-[#e7decc] bg-[#f8f4ea]/95",
-        "backdrop-blur supports-[backdrop-filter]:bg-[#f8f4ea]/85",
+        "sticky top-0 z-40 border-b border-[var(--song-border-soft)] bg-[var(--song-bg)]/95",
+        "backdrop-blur supports-[backdrop-filter]:bg-[var(--song-bg)]/85",
         optionBDisplayFont.variable,
         optionBBodyFont.variable,
       )}
@@ -63,7 +45,7 @@ export function AppNavbar({ userEmail }: AppNavbarProps) {
         <Link
           href={userEmail ? "/songs" : "/login"}
           className={cn(
-            "shrink-0 text-3xl leading-none font-bold text-[#2d2a24]",
+            "shrink-0 text-3xl leading-none font-bold text-[var(--song-text)]",
             optionBClassNames.display,
           )}
         >
@@ -72,7 +54,7 @@ export function AppNavbar({ userEmail }: AppNavbarProps) {
 
         {userEmail ? (
           <nav
-            aria-label="Navigation principale"
+            aria-label="Main navigation"
             className={cn("flex items-center gap-1 overflow-x-auto", optionBClassNames.body)}
           >
             {NAV_ITEMS.map((item) => {
@@ -82,9 +64,9 @@ export function AppNavbar({ userEmail }: AppNavbarProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-sm px-3 py-2 text-sm font-semibold transition-colors",
-                    "text-[#5a5246] hover:bg-[#efe6d6] hover:text-[#2d2a24]",
-                    isActive ? "bg-[#2d2a24] text-[#f8f4ea] hover:bg-[#2d2a24]" : "",
+                    "min-h-[44px] min-w-[44px] flex items-center rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
+                    "text-[var(--song-text-muted)] hover:bg-[var(--song-surface-highlight)] hover:text-[var(--song-text)]",
+                    isActive ? "bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent-hover)]" : "",
                   )}
                   aria-current={isActive ? "page" : undefined}
                 >
@@ -100,31 +82,24 @@ export function AppNavbar({ userEmail }: AppNavbarProps) {
         <div className={cn("flex items-center gap-2", optionBClassNames.body)}>
           {userEmail ? (
             <>
-              <span className="hidden max-w-40 truncate text-xs font-medium text-[#5a5246] sm:block">
+              <span className="hidden max-w-40 truncate text-xs font-medium text-[var(--song-text-muted)] sm:block">
                 {userEmail}
               </span>
-              <Button
-                type="button"
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="rounded-sm bg-[#2d2a24] px-3 py-2 text-xs font-semibold text-[#f8f4ea] hover:bg-[#2d2a24]/90"
-              >
-                {isSigningOut ? "..." : "Deconnexion"}
-              </Button>
+              <AppNavbarSignOutButton />
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="rounded-sm px-3 py-2 text-sm font-semibold text-[#5a5246] transition-colors hover:bg-[#efe6d6] hover:text-[#2d2a24]"
+                className="flex min-h-[44px] items-center rounded-lg px-3 py-2 text-sm font-semibold text-[var(--song-text-muted)] transition-colors hover:bg-[var(--song-surface-highlight)] hover:text-[var(--song-text)]"
               >
-                Connexion
+                Log in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-sm bg-[#2d2a24] px-3 py-2 text-sm font-semibold text-[#f8f4ea] transition-colors hover:bg-[#2d2a24]/90"
+                className="flex min-h-[44px] items-center rounded-lg bg-[var(--song-accent)] px-3 py-2 text-sm font-semibold text-[var(--song-accent-foreground)] transition-colors hover:bg-[var(--song-accent-hover)]"
               >
-                Inscription
+                Sign up
               </Link>
             </>
           )}

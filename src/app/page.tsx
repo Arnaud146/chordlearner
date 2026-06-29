@@ -6,6 +6,7 @@ import {
   optionBClassNames,
   optionBDisplayFont,
 } from "@/components/option-b/theme";
+import { PublicFooter } from "@/components/public-footer";
 import { cn } from "@/lib/utils";
 
 export default async function LandingPage() {
@@ -44,7 +45,7 @@ export default async function LandingPage() {
       )}
     >
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-[#2d2a24] pb-0 pt-16 md:pt-20">
+      <section className="relative overflow-hidden bg-[var(--song-hero-dark)] pb-0 pt-16 md:pt-20">
         {/* Decorative glow */}
         <div
           aria-hidden
@@ -58,7 +59,7 @@ export default async function LandingPage() {
               optionBClassNames.body,
             )}
           >
-            L&apos;app piano pour maitriser tes accords
+            The piano app to master your chords
           </p>
 
           <h1
@@ -67,10 +68,10 @@ export default async function LandingPage() {
               optionBClassNames.display,
             )}
           >
-            Joue tes morceaux
+            Play your songs
             <br />
             <span className="bg-gradient-to-r from-[#d9ccb2] to-[#8e8068] bg-clip-text text-transparent">
-              au piano
+              on the piano
             </span>
           </h1>
 
@@ -80,8 +81,8 @@ export default async function LandingPage() {
               optionBClassNames.body,
             )}
           >
-            Importe une grille d&apos;accords, decouvre les voicings sur le
-            clavier et transpose en un clic. Gratuit.
+            Import a chord chart, discover voicings on the keyboard and
+            transpose in one click. Free.
           </p>
 
           <div
@@ -92,15 +93,15 @@ export default async function LandingPage() {
           >
             <Link
               href="/signup"
-              className="inline-flex h-14 items-center rounded-md bg-[#f8f4ea] px-10 text-base font-bold text-[#2d2a24] shadow-lg shadow-black/20 transition-all hover:bg-white hover:shadow-xl hover:shadow-black/30"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-[#f8f4ea] px-10 text-base font-bold text-[var(--song-hero-dark)] shadow-[var(--song-shadow)] transition-all hover:bg-white hover:shadow-[var(--song-shadow-hover)]"
             >
-              Commencer gratuitement
+              Start for free
             </Link>
             <Link
               href="/login"
-              className="inline-flex h-14 items-center rounded-md border border-[#5a5246] px-10 text-base font-semibold text-[#c4b697] transition-all hover:border-[#8e8068] hover:text-[#f8f4ea]"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-[#5a5246] px-10 text-base font-semibold text-[#c4b697] transition-all hover:border-[#8e8068] hover:text-[#f8f4ea] hover:bg-white/5"
             >
-              J&apos;ai deja un compte
+              I already have an account
             </Link>
           </div>
         </div>
@@ -148,7 +149,7 @@ export default async function LandingPage() {
               optionBClassNames.body,
             )}
           >
-            Fonctionnalites
+            Features
           </p>
           <h2
             className={cn(
@@ -156,7 +157,7 @@ export default async function LandingPage() {
               optionBClassNames.display,
             )}
           >
-            Tout ce qu&apos;il te faut pour progresser
+            Everything you need to make progress
           </h2>
         </div>
 
@@ -169,8 +170,8 @@ export default async function LandingPage() {
                 <circle cx="18" cy="16" r="3" />
               </svg>
             }
-            title="Importe tes grilles"
-            description="Saisis tes accords manuellement ou importe-les depuis une image grace a l'OCR integre."
+            title="Import your charts"
+            description="Enter your chords manually or import them from an image thanks to the built-in OCR."
           />
           <FeatureCard
             icon={
@@ -185,8 +186,8 @@ export default async function LandingPage() {
                 <path d="M16 4v10" />
               </svg>
             }
-            title="Visualise les voicings"
-            description="Chaque accord est affiche sur un clavier de piano avec les doigtes suggeres et les inversions."
+            title="Visualize the voicings"
+            description="Each chord is shown on a piano keyboard with suggested fingerings and inversions."
           />
           <FeatureCard
             icon={
@@ -194,8 +195,8 @@ export default async function LandingPage() {
                 <path d="M2 12h5l2-9 4 18 3-9h6" />
               </svg>
             }
-            title="Transpose en un clic"
-            description="Change la tonalite de n'importe quel morceau instantanement, tes voicings suivent."
+            title="Transpose in one click"
+            description="Change the key of any song instantly, and your voicings follow along."
           />
           <FeatureCard
             icon={
@@ -204,8 +205,8 @@ export default async function LandingPage() {
                 <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z" />
               </svg>
             }
-            title="Corrige et personnalise"
-            description="Modifie les accords detectes, choisis ta notation preferee (dieses ou bemols)."
+            title="Correct and customize"
+            description="Edit the detected chords and choose your preferred notation (sharps or flats)."
           />
           <FeatureCard
             icon={
@@ -215,8 +216,8 @@ export default async function LandingPage() {
                 <polyline points="7 3 7 8 15 8" />
               </svg>
             }
-            title="Sauvegarde tes presets"
-            description="Enregistre des configurations de pratique pour chaque morceau et retrouve-les facilement."
+            title="Save your presets"
+            description="Save practice configurations for each song and find them again easily."
           />
           <FeatureCard
             icon={
@@ -225,8 +226,8 @@ export default async function LandingPage() {
                 <path d="m9 12 2 2 4-4" />
               </svg>
             }
-            title="Simple et gratuit"
-            description="Pas d'abonnement, pas de publicite. Cree ton compte et commence a jouer."
+            title="Simple and free"
+            description="No subscription, no ads. Create your account and start playing."
           />
         </div>
       </section>
@@ -241,7 +242,7 @@ export default async function LandingPage() {
                 optionBClassNames.body,
               )}
             >
-              Comment ca marche
+              How it works
             </p>
             <h2
               className={cn(
@@ -249,25 +250,25 @@ export default async function LandingPage() {
                 optionBClassNames.display,
               )}
             >
-              En trois etapes
+              In three steps
             </h2>
           </div>
 
           <div className="grid gap-12 md:grid-cols-3 md:gap-8">
             <StepCard
               step="1"
-              title="Ajoute un morceau"
-              description="Colle ta grille d'accords en texte ou importe une photo. L'app detecte automatiquement chaque accord."
+              title="Add a song"
+              description="Paste your chord chart as text or import a photo. The app automatically detects each chord."
             />
             <StepCard
               step="2"
-              title="Explore les voicings"
-              description="Visualise chaque accord sur le clavier, compare les inversions et choisis tes voicings preferes."
+              title="Explore the voicings"
+              description="Visualize each chord on the keyboard, compare inversions and choose your favorite voicings."
             />
             <StepCard
               step="3"
-              title="Joue et progresse"
-              description="Transpose, sauvegarde tes presets et reviens pratiquer a tout moment. Tes selections sont memorisees."
+              title="Play and progress"
+              description="Transpose, save your presets and come back to practice anytime. Your selections are remembered."
             />
           </div>
         </div>
@@ -275,7 +276,7 @@ export default async function LandingPage() {
 
       {/* ── Final CTA ── */}
       <section className="mx-auto max-w-5xl px-6 py-20 md:py-28">
-        <div className="relative overflow-hidden rounded-sm border border-[#d9ccb2] bg-white p-10 text-center shadow-sm md:p-16">
+        <div className="relative overflow-hidden rounded-xl border border-[var(--song-border)] bg-white p-10 text-center shadow-[var(--song-shadow)] md:p-16">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-16 size-[240px] rounded-full bg-[#f3ede0] blur-2xl"
@@ -292,93 +293,30 @@ export default async function LandingPage() {
                 optionBClassNames.display,
               )}
             >
-              Pret a jouer ?
+              Ready to play?
             </h2>
             <p
               className={cn(
-                "mx-auto mt-4 max-w-md text-lg text-[#5a5246]",
+                "mx-auto mt-4 max-w-md text-lg text-[var(--song-text-muted)]",
                 optionBClassNames.body,
               )}
             >
-              Cree ton compte en quelques secondes et commence a apprendre tes
-              morceaux preferes au piano.
+              Create your account in seconds and start learning your favorite
+              songs on the piano.
             </p>
             <div className={cn("mt-8", optionBClassNames.body)}>
               <Link
                 href="/signup"
-                className="inline-flex h-12 items-center rounded-sm bg-[#2d2a24] px-8 text-base font-semibold text-[#f8f4ea] shadow-lg shadow-[#2d2a24]/10 transition-all hover:bg-[#2d2a24]/90 hover:shadow-xl hover:shadow-[#2d2a24]/15"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-[var(--song-accent)] px-8 text-base font-semibold text-[var(--song-accent-foreground)] shadow-[var(--song-shadow)] transition-all hover:bg-[var(--song-accent-hover)] hover:shadow-[var(--song-shadow-hover)]"
               >
-                Commencer maintenant
+                Start now
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="bg-[#2d2a24] text-[#c4b697]">
-        <div className="mx-auto max-w-5xl px-6 py-10">
-          {/* Top row: brand + nav */}
-          <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
-            <div className="flex items-center gap-3">
-              <p
-                className={cn(
-                  "text-xl font-bold text-[#f8f4ea]",
-                  optionBClassNames.display,
-                )}
-              >
-                ChordLearner
-              </p>
-              <span className="hidden text-[#5a5246] sm:inline" aria-hidden>|</span>
-              <p
-                className={cn(
-                  "hidden text-sm text-[#8e8068] sm:block",
-                  optionBClassNames.body,
-                )}
-              >
-                Apprends le piano par les accords
-              </p>
-            </div>
-
-            <nav
-              aria-label="Liens legaux"
-              className={cn(
-                "flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm",
-                optionBClassNames.body,
-              )}
-            >
-              <Link
-                href="/mentions-legales"
-                className="text-[#a89a80] transition-colors hover:text-[#f8f4ea]"
-              >
-                Mentions legales
-              </Link>
-              <Link
-                href="/cgu"
-                className="text-[#a89a80] transition-colors hover:text-[#f8f4ea]"
-              >
-                CGU
-              </Link>
-              <Link
-                href="/confidentialite"
-                className="text-[#a89a80] transition-colors hover:text-[#f8f4ea]"
-              >
-                Confidentialite
-              </Link>
-            </nav>
-          </div>
-
-          {/* Bottom copyright */}
-          <div
-            className={cn(
-              "mt-6 border-t border-[#3d3a34] pt-5 text-center text-xs text-[#6b6152]",
-              optionBClassNames.body,
-            )}
-          >
-            &copy; {new Date().getFullYear()} ChordLearner. Tous droits reserves.
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }
@@ -395,8 +333,8 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="group rounded-sm border border-[#e7decc] bg-white/60 p-6 transition-all hover:border-[#d9ccb2] hover:bg-white hover:shadow-sm">
-      <div className="mb-4 inline-flex size-12 items-center justify-center rounded-sm bg-[#f3ede0] text-[#5a5246] transition-colors group-hover:bg-[#efe6d6] group-hover:text-[#2d2a24]">
+    <div className="group rounded-xl border border-[var(--song-border-soft)] bg-white/80 p-6 shadow-[var(--song-shadow)] transition-all hover:border-[var(--song-border)] hover:bg-white hover:shadow-[var(--song-shadow-hover)]">
+      <div className="mb-4 inline-flex size-12 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-[var(--song-surface-muted)] text-[var(--song-text-muted)] transition-colors group-hover:bg-[var(--song-surface-highlight)] group-hover:text-[var(--song-accent)]">
         {icon}
       </div>
       <h3
@@ -409,7 +347,7 @@ function FeatureCard({
       </h3>
       <p
         className={cn(
-          "text-sm leading-relaxed text-[#5a5246]",
+          "text-sm leading-relaxed text-[var(--song-text-muted)]",
           optionBClassNames.body,
         )}
       >
@@ -432,7 +370,7 @@ function StepCard({
     <div className="text-center">
       <div
         className={cn(
-          "mx-auto mb-5 flex size-14 items-center justify-center rounded-full border-2 border-[#2d2a24] text-2xl font-bold text-[#2d2a24]",
+          "mx-auto mb-5 flex size-14 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border-2 border-[var(--song-accent)] bg-[var(--song-accent)]/10 text-2xl font-bold text-[var(--song-accent)]",
           optionBClassNames.display,
         )}
       >
@@ -448,7 +386,7 @@ function StepCard({
       </h3>
       <p
         className={cn(
-          "text-sm leading-relaxed text-[#5a5246]",
+          "text-sm leading-relaxed text-[var(--song-text-muted)]",
           optionBClassNames.body,
         )}
       >

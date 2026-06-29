@@ -1,5 +1,6 @@
 import { AuthForm } from "@/components/auth/auth-form";
 import { optionBBodyFont, optionBClassNames, optionBDisplayFont } from "@/components/option-b/theme";
+import { PublicFooter } from "@/components/public-footer";
 import { sanitizeRedirectPath } from "@/lib/auth/redirect";
 
 interface SignupPageProps {
@@ -14,25 +15,28 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
 
   return (
     <div
-      className={`${optionBDisplayFont.variable} ${optionBBodyFont.variable} mx-auto grid max-w-xl gap-6 bg-[#f8f4ea] text-[#2d2a24]`}
+      className={`${optionBDisplayFont.variable} ${optionBBodyFont.variable} flex min-h-[calc(100vh-8rem)] flex-col`}
     >
-      <div className="space-y-2 text-center">
-        <p
-          className={`${optionBClassNames.body} text-xs font-semibold tracking-[0.14em] text-[#8e8068] uppercase`}
-        >
-          Espace membre
-        </p>
-        <h1 className={`${optionBClassNames.display} text-5xl font-bold md:text-6xl`}>
-          Inscription
-        </h1>
-        <p className={`${optionBClassNames.body} text-[#5a5246]`}>
-          Cree ton compte pour avoir une sauvegarde personnelle de tes accords.
-        </p>
-      </div>
+      <div className="mx-auto grid max-w-xl flex-1 gap-6 py-8 text-[var(--song-text)]">
+        <div className="space-y-2 text-center">
+          <p
+            className={`${optionBClassNames.body} text-xs font-semibold uppercase tracking-[0.14em] text-[var(--song-text-subtle)]`}
+          >
+            Member area
+          </p>
+          <h1 className={`${optionBClassNames.display} text-5xl font-bold md:text-6xl`}>
+            Sign up
+          </h1>
+          <p className={`${optionBClassNames.body} text-[var(--song-text-muted)]`}>
+            Create your account to have a personal backup of your chords.
+          </p>
+        </div>
 
-      <div className="border border-[#d9ccb2] bg-white p-6">
-        <AuthForm mode="signup" nextPath={nextPath} />
+        <div className="rounded-xl border border-[var(--song-border)] bg-[var(--song-surface)] p-6 shadow-[var(--song-shadow)]">
+          <AuthForm mode="signup" nextPath={nextPath} />
+        </div>
       </div>
+      <PublicFooter />
     </div>
   );
 }

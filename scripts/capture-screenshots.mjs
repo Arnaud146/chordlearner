@@ -69,6 +69,15 @@ async function main() {
     });
     await capture(publicPage, "02-login.png", `${BASE_URL}/login`);
     await capture(publicPage, "03-signup.png", `${BASE_URL}/signup`);
+    await capture(publicPage, "09-cgu.png", `${BASE_URL}/cgu`, {
+      fullPage: true,
+    });
+    await capture(publicPage, "10-confidentialite.png", `${BASE_URL}/confidentialite`, {
+      fullPage: true,
+    });
+    await capture(publicPage, "11-mentions-legales.png", `${BASE_URL}/mentions-legales`, {
+      fullPage: true,
+    });
   } finally {
     await publicContext.close();
   }
@@ -111,13 +120,22 @@ async function main() {
           `${BASE_URL}/songs/${SONG_ID}`,
           { fullPage: true },
         );
+        await capture(
+          authPage,
+          "07b-song-chords.png",
+          `${BASE_URL}/songs/${SONG_ID}/chords`,
+          { fullPage: true },
+        );
       } else {
         console.warn(
-          "[skip] 07-song-detail.png — set CHORDLEARNER_SONG_ID to a real song UUID",
+          "[skip] 07-song-detail.png, 07b-song-chords.png — set CHORDLEARNER_SONG_ID to a real song UUID",
         );
       }
 
       await capture(authPage, "08-profil.png", `${BASE_URL}/profil`, {
+        fullPage: true,
+      });
+      await capture(authPage, "12-status.png", `${BASE_URL}/status`, {
         fullPage: true,
       });
     } finally {

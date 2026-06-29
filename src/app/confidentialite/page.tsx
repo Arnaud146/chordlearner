@@ -1,34 +1,38 @@
 import type { Metadata } from "next";
+import { PublicFooter } from "@/components/public-footer";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialite | ChordLearner",
-  description: "Politique de confidentialite de ChordLearner.",
+  title: "Privacy Policy | ChordLearner",
+  description: "ChordLearner privacy policy.",
 };
 
 export default function ConfidentialitePage() {
   return (
-    <article className="prose prose-zinc mx-auto max-w-3xl py-10">
-      <h1>Politique de confidentialite</h1>
-      <h2>Donnees collectees</h2>
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col">
+      <article className="prose prose-zinc mx-auto max-w-3xl flex-1 py-10 prose-headings:text-[var(--song-text)] prose-p:text-[var(--song-text-muted)]">
+      <h1>Privacy Policy</h1>
+      <h2>Data collected</h2>
       <p>
-        ChordLearner collecte les donnees necessaires au fonctionnement du compte (email, preferences, morceaux).
+        ChordLearner collects the data needed to run your account (email, preferences, songs).
       </p>
-      <h2>Finalites</h2>
+      <h2>Purposes</h2>
       <p>
-        Les donnees sont traitees pour fournir le service, securiser l&apos;application et ameliorer
-        l&apos;experience utilisateur.
+        The data is processed to provide the service, secure the application and improve the
+        user experience.
       </p>
-      <h2>Conservation</h2>
-      <p>Les donnees sont conservees pendant la duree strictement necessaire a la finalite du service.</p>
-      <h2>Droits</h2>
+      <h2>Retention</h2>
+      <p>The data is kept only for as long as strictly necessary for the purpose of the service.</p>
+      <h2>Your rights</h2>
       <p>
-        Tu peux demander l&apos;acces, la rectification ou la suppression de tes donnees via
+        You can request access to, correction of, or deletion of your data via
         contact@chordlearner.app.
       </p>
       <p>
-        Ce contenu est un modele minimal et doit etre adapte a tes obligations RGPD reelles avant
-        publication definitive.
+        This content is a minimal template and must be adapted to your actual GDPR obligations before
+        final publication.
       </p>
-    </article>
+      </article>
+      <PublicFooter />
+    </div>
   );
 }

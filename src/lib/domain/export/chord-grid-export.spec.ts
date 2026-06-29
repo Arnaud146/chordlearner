@@ -88,8 +88,8 @@ describe("chord-grid-export domain", () => {
       }),
     ).toEqual({
       title: "Titre",
-      artistLabel: "Artiste: Artiste inconnu",
-      keyLabel: "Tonalite: D",
+      artistLabel: "Artist: Unknown artist",
+      keyLabel: "Key: D",
       notationLabel: "Notation: sharps",
     });
   });

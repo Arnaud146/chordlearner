@@ -28,13 +28,13 @@ export function UrlExtractionForm({
     <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface-soft)] shadow-[var(--song-shadow)]">
       <CardHeader>
         <CardTitle className={`${optionBClassNames.display} text-3xl font-bold text-[var(--song-text)]`}>
-          Extraction web
+          Web extraction
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="webSourceUrl" className={`${optionBClassNames.body} text-[var(--song-text)]`}>
-            URL page paroles + accords
+            Lyrics + chords page URL
           </Label>
           <Input
             id="webSourceUrl"
@@ -51,7 +51,7 @@ export function UrlExtractionForm({
             onClick={onAnalyze}
             disabled={isLoading || !url.trim()}
           >
-            {isLoading ? "Analyse en cours..." : "Analyser la page"}
+            {isLoading ? "Analyzing..." : "Analyze the page"}
           </Button>
           <Button
             type="button"
@@ -59,7 +59,7 @@ export function UrlExtractionForm({
             className={`${optionBClassNames.body} rounded-xl border-[var(--song-border)] bg-[var(--song-surface-highlight)] text-[var(--song-text)] hover:bg-[var(--song-surface-muted)]`}
             onClick={onSwitchToOcr}
           >
-            Passer en mode OCR (upload)
+            Switch to OCR mode (upload)
           </Button>
         </div>
 
@@ -73,10 +73,10 @@ export function UrlExtractionForm({
           >
             <p className="font-semibold">
               {result.success
-                ? "Extraction web reussie"
+                ? "Web extraction succeeded"
                 : result.fallbackUsed
-                  ? "Extraction web en echec, OCR recommande"
-                  : "Extraction web en echec"}
+                  ? "Web extraction failed, OCR recommended"
+                  : "Web extraction failed"}
             </p>
             <p>{result.message}</p>
             <p className={result.success ? "text-[var(--song-text-muted)]" : ""}>

@@ -5,10 +5,10 @@
 export type SourceType = "manual" | "ocr_image" | "web_page";
 export type NotationPreference = "auto" | "sharps" | "flats";
 export type HandMode = "RH" | "BH";
-export type SelectionSource = "default_auto" | "user_selected";
+type SelectionSource = "default_auto" | "user_selected";
 export type OCRReviewStatus = "pending" | "validated" | "discarded";
-export type ExtractionSourceType = "html" | "pdf" | "image" | "unknown";
-export type SongExtractionStatus = "pending" | "analyzed" | "fallback" | "error";
+type ExtractionSourceType = "html" | "pdf" | "image" | "unknown";
+type SongExtractionStatus = "pending" | "analyzed" | "fallback" | "error";
 
 // ============================================================
 // Row types (what you get back from SELECT)

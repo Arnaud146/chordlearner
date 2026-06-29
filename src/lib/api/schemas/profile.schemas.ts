@@ -4,14 +4,12 @@ export const updateProfileSchema = z.object({
   displayName: z
     .string()
     .trim()
-    .min(2, "Le pseudo doit contenir au moins 2 caracteres")
-    .max(40, "Le pseudo ne peut pas depasser 40 caracteres"),
+    .min(2, "Username must be at least 2 characters")
+    .max(40, "Username cannot exceed 40 characters"),
   fullName: z
     .string()
     .trim()
-    .max(80, "Le nom complet ne peut pas depasser 80 caracteres")
+    .max(80, "Full name cannot exceed 80 characters")
     .nullable()
     .optional(),
 });
-
-export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

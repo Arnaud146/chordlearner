@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
+import { PublicFooter } from "@/components/public-footer";
 
 export const metadata: Metadata = {
-  title: "CGU | ChordLearner",
-  description: "Conditions generales d'utilisation de ChordLearner.",
+  title: "Terms | ChordLearner",
+  description: "ChordLearner terms of service.",
 };
 
 export default function CguPage() {
   return (
-    <article className="prose prose-zinc mx-auto max-w-3xl py-10">
-      <h1>Conditions generales d&apos;utilisation (CGU)</h1>
-      <h2>1. Objet</h2>
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col">
+      <article className="prose prose-zinc mx-auto max-w-3xl flex-1 py-10 prose-headings:text-[var(--song-text)] prose-p:text-[var(--song-text-muted)]">
+      <h1>Terms of Service</h1>
+      <h2>1. Purpose</h2>
       <p>
-        ChordLearner propose un service d&apos;apprentissage du piano base sur les grilles d&apos;accords.
+        ChordLearner offers a piano learning service based on chord charts.
       </p>
-      <h2>2. Compte utilisateur</h2>
-      <p>L&apos;utilisateur est responsable des informations fournies et de la confidentialite de son compte.</p>
-      <h2>3. Propriete intellectuelle</h2>
+      <h2>2. User account</h2>
+      <p>The user is responsible for the information provided and for keeping their account confidential.</p>
+      <h2>3. Intellectual property</h2>
       <p>
-        Les contenus importes restent sous la responsabilite de l&apos;utilisateur, qui garantit disposer des
-        droits necessaires.
+        Imported content remains the user&apos;s responsibility, and the user warrants that they hold the
+        necessary rights.
       </p>
-      <h2>4. Limitation de responsabilite</h2>
+      <h2>4. Limitation of liability</h2>
       <p>
-        Le service est fourni &quot;en l&apos;etat&quot; sans garantie d&apos;absence d&apos;interruption ou d&apos;erreur.
+        The service is provided &quot;as is&quot; without any guarantee of being uninterrupted or error-free.
       </p>
       <p>
-        Ce modele doit etre adapte et valide juridiquement avant une exploitation commerciale.
+        This template must be reviewed and validated by a legal professional before any commercial use.
       </p>
-    </article>
+      </article>
+      <PublicFooter />
+    </div>
   );
 }

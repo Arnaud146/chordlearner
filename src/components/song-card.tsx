@@ -20,13 +20,13 @@ function buildDeleteErrorMessage(status: number, fallback?: string): string {
   switch (status) {
     case 401:
     case 403:
-      return "Suppression refusee. Verifie ta session puis reconnecte-toi.";
+      return "Deletion denied. Check your session and log in again.";
     case 404:
-      return "Ce morceau n'existe plus. Recharge la page.";
+      return "This song no longer exists. Reload the page.";
     case 409:
-      return "Suppression bloquee par une dependance. Essaie de nouveau apres synchronisation.";
+      return "Deletion blocked by a dependency. Try again after syncing.";
     default:
-      return "Impossible de supprimer le morceau pour le moment. Reessaie dans quelques secondes.";
+      return "Unable to delete the song right now. Try again in a few seconds.";
   }
 }
 
@@ -73,7 +73,7 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
       setDeleteError(
         error instanceof Error
           ? error.message
-          : "Suppression impossible. Verifie ta connexion et reessaie.",
+          : "Deletion failed. Check your connection and try again.",
       );
     } finally {
       setIsDeleting(false);
@@ -90,7 +90,7 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
             </Link>
           </h3>
           <p className={`${optionBClassNames.body} text-sm text-[var(--song-text-subtle)]`}>
-            {artist ?? "Artiste inconnu"}
+            {artist ?? "Unknown artist"}
           </p>
         </header>
 
@@ -99,13 +99,13 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
             <p
               className={`${optionBClassNames.body} inline-flex rounded-full border border-[var(--song-border)] bg-[var(--song-surface-highlight)] px-2.5 py-1 text-xs font-semibold text-[var(--song-text-muted)]`}
             >
-              Tonalite: {musicalKey}
+              Key: {musicalKey}
             </p>
           ) : (
             <p
               className={`${optionBClassNames.body} inline-flex rounded-full border border-[var(--song-border-soft)] bg-[var(--song-surface-soft)] px-2.5 py-1 text-xs font-semibold text-[var(--song-text-subtle)]`}
             >
-              Tonalite non definie
+              Key not set
             </p>
           )}
 
@@ -116,7 +116,7 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
               size="sm"
               className={`${optionBClassNames.body} rounded-xl border-[var(--song-border)] bg-[var(--song-surface-highlight)] text-[var(--song-text)] hover:bg-[var(--song-surface-muted)]`}
             >
-              <Link href={`/songs/${id}`}>Ouvrir</Link>
+              <Link href={`/songs/${id}`}>Open</Link>
             </Button>
             <Button
               type="button"
@@ -129,10 +129,10 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
                 setIsDeleteConfirmOpen(true);
               }}
               disabled={isDeleting}
-              aria-label={`Supprimer ${title}`}
+              aria-label={`Delete ${title}`}
             >
               <Trash2 className="size-4" />
-              Supprimer
+              Delete
             </Button>
           </div>
 
@@ -146,7 +146,7 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
         <div className="fixed inset-0 z-50 grid place-items-end p-4 sm:place-items-center">
           <button
             type="button"
-            aria-label="Fermer la fenetre de confirmation"
+            aria-label="Close the confirmation dialog"
             className="absolute inset-0 bg-black/45"
             onClick={() => {
               if (!isDeleting) setIsDeleteConfirmOpen(false);
@@ -165,13 +165,13 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
               </span>
               <div>
                 <h4 id={dialogTitleId} className={`${optionBClassNames.display} text-3xl font-bold text-[var(--song-text)]`}>
-                  Supprimer ce morceau ?
+                  Delete this song?
                 </h4>
                 <p
                   id={dialogDescriptionId}
                   className={`${optionBClassNames.body} mt-1 text-sm text-[var(--song-text-muted)]`}
                 >
-                  Cette action est definitive et retirera &quot;{title}&quot; de ta bibliotheque.
+                  This action is permanent and will remove &quot;{title}&quot; from your library.
                 </p>
               </div>
             </div>
@@ -183,7 +183,7 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
                 onClick={() => setIsDeleteConfirmOpen(false)}
                 disabled={isDeleting}
               >
-                Annuler
+                Cancel
               </Button>
               <Button
                 type="button"
@@ -192,7 +192,7 @@ export function SongCard({ id, title, artist, musicalKey }: SongCardProps) {
                 onClick={handleDeleteConfirmed}
                 disabled={isDeleting}
               >
-                {isDeleting ? "Suppression..." : "Confirmer"}
+                {isDeleting ? "Deleting..." : "Confirm"}
               </Button>
             </div>
           </div>

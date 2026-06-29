@@ -17,7 +17,7 @@ export function SourceModeTabs({ value, onValueChange }: SourceModeTabsProps) {
         className={`${optionBClassNames.body} rounded-lg border border-transparent px-3 py-2 text-sm font-semibold text-[var(--song-text-muted)] data-[state=active]:border-[var(--song-border)] data-[state=active]:bg-[var(--song-surface)] data-[state=active]:text-[var(--song-text)]`}
         onClick={() => onValueChange("web")}
       >
-        Extraction web (URL)
+        Web extraction (URL)
       </TabsTrigger>
       <TabsTrigger
         value="ocr"
@@ -25,7 +25,7 @@ export function SourceModeTabs({ value, onValueChange }: SourceModeTabsProps) {
         className={`${optionBClassNames.body} rounded-lg border border-transparent px-3 py-2 text-sm font-semibold text-[var(--song-text-muted)] data-[state=active]:border-[var(--song-border)] data-[state=active]:bg-[var(--song-surface)] data-[state=active]:text-[var(--song-text)]`}
         onClick={() => onValueChange("ocr")}
       >
-        OCR (upload fichier)
+        OCR (file upload)
       </TabsTrigger>
     </TabsList>
   );

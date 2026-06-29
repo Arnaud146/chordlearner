@@ -14,6 +14,15 @@ export function transposeChordSymbol(params: {
     return params.chordSymbol;
   }
 
+  if (params.semitoneDelta === 0) {
+    return formatChordSymbol({
+      rootNote: parsed.rootNote,
+      qualitySymbol: parsed.qualitySymbol ?? "",
+      slashBass: parsed.slashBass,
+      notationPreference: params.notationPreference,
+    });
+  }
+
   const nextRoot = transposeNote({
     note: parsed.rootNote,
     semitoneDelta: params.semitoneDelta,

@@ -42,7 +42,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       data: { preset, selections: selectionsWithVoicing },
     });
   } catch (error) {
-    return handleApiError(error, "Impossible de charger le preset");
+    return handleApiError(error, "Unable to load the preset");
   }
 }
 
@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const updated = await repo.updatePreset(presetId, { name: body.name });
     return NextResponse.json({ data: updated });
   } catch (error) {
-    return handleApiError(error, "Impossible de renommer le preset");
+    return handleApiError(error, "Unable to rename the preset");
   }
 }
 
@@ -69,6 +69,6 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     await repo.deletePreset(presetId);
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
-    return handleApiError(error, "Impossible de supprimer le preset");
+    return handleApiError(error, "Unable to delete the preset");
   }
 }

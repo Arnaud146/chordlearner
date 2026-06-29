@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const presets = await repo.listPresetsForSong(songId);
     return NextResponse.json({ data: presets });
   } catch (error) {
-    return handleApiError(error, "Impossible de charger les presets");
+    return handleApiError(error, "Unable to load the presets");
   }
 }
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const voicingRepo = createVoicingRepository(supabase);
 
     const existingPresets = await presetRepo.listPresetsForSong(songId);
-    const presetName = body.name ?? `Plan de jeu ${existingPresets.length + 1}`;
+    const presetName = body.name ?? `Practice plan ${existingPresets.length + 1}`;
 
     const preset = await presetRepo.createPreset({
       song_id: songId,
@@ -61,6 +61,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: preset }, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "Impossible de creer le preset");
+    return handleApiError(error, "Unable to create the preset");
   }
 }

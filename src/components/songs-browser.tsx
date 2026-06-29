@@ -63,9 +63,9 @@ export function SongsBrowser({ songs }: SongsBrowserProps) {
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Rechercher un morceau, artiste ou tonalite..."
+            placeholder="Search by song, artist or key..."
             className={`${optionBClassNames.body} h-10 rounded-xl border-[var(--song-border)] bg-[var(--song-surface)] pr-10 pl-9 text-[var(--song-text)]`}
-            aria-label="Rechercher un morceau"
+            aria-label="Search for a song"
           />
           {searchQuery.trim() ? (
             <Button
@@ -74,7 +74,7 @@ export function SongsBrowser({ songs }: SongsBrowserProps) {
               size="icon-xs"
               className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full text-[var(--song-text-subtle)] hover:bg-[var(--song-surface-highlight)]"
               onClick={() => setSearchQuery("")}
-              aria-label="Effacer la recherche"
+              aria-label="Clear search"
             >
               <X className="size-3.5" />
             </Button>
@@ -88,12 +88,12 @@ export function SongsBrowser({ songs }: SongsBrowserProps) {
             variant={selectedKey === "all" ? "default" : "outline"}
             className={`${optionBClassNames.body} rounded-full border-[var(--song-border)] px-3 ${
               selectedKey === "all"
-                ? "bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent)]/90"
+                ? "bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent-hover)]"
                 : "bg-[var(--song-surface)] text-[var(--song-text-muted)] hover:bg-[var(--song-surface-highlight)]"
             }`}
             onClick={() => setSelectedKey("all")}
           >
-            Toutes tonalites
+            All keys
           </Button>
           {keyFilters.map((key) => (
             <Button
@@ -103,7 +103,7 @@ export function SongsBrowser({ songs }: SongsBrowserProps) {
               variant={selectedKey === key ? "default" : "outline"}
               className={`${optionBClassNames.body} rounded-full border-[var(--song-border)] px-3 ${
                 selectedKey === key
-                  ? "bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent)]/90"
+                  ? "bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent-hover)]"
                   : "bg-[var(--song-surface)] text-[var(--song-text-muted)] hover:bg-[var(--song-surface-highlight)]"
               }`}
               onClick={() => setSelectedKey(key)}
@@ -114,19 +114,19 @@ export function SongsBrowser({ songs }: SongsBrowserProps) {
         </div>
 
         <p className={`${optionBClassNames.body} mt-3 text-sm text-[var(--song-text-subtle)]`}>
-          {filteredSongs.length} morceau{filteredSongs.length > 1 ? "x" : ""} affiche
-          {filteredSongs.length > 1 ? "s" : ""} sur {songs.length}
-          {hasActiveFilters ? " (filtres actifs)" : ""}
+          {filteredSongs.length} song{filteredSongs.length > 1 ? "s" : ""} shown of{" "}
+          {songs.length}
+          {hasActiveFilters ? " (filters active)" : ""}
         </p>
       </div>
 
       {filteredSongs.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--song-border)] bg-[var(--song-surface)] p-8 text-center shadow-[var(--song-shadow)]">
           <p className={`${optionBClassNames.body} text-base text-[var(--song-text-muted)]`}>
-            Aucun morceau ne correspond a cette recherche.
+            No song matches this search.
           </p>
           <p className={`${optionBClassNames.body} mt-1 text-sm text-[var(--song-text-subtle)]`}>
-            Essaie un autre mot-cle ou retire le filtre de tonalite.
+            Try another keyword or remove the key filter.
           </p>
         </div>
       ) : (

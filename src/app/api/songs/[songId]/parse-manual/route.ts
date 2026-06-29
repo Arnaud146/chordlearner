@@ -39,6 +39,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       },
     });
   } catch (error) {
-    return handleApiError(error, "Impossible d'analyser la saisie manuelle");
+    return handleApiError(error, "Unable to parse the manual input");
   }
 }

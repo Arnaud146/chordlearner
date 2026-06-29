@@ -18,7 +18,7 @@ export function assertSupabaseData<T>(
   response: PostgrestSingleResponse<T>,
 ): T {
   if (response.error) {
-    const rawMessage = response.error.message ?? "Erreur inconnue";
+    const rawMessage = response.error.message ?? "Unknown error";
     const isNetworkFailure = /fetch failed/i.test(rawMessage);
     const hint = isNetworkFailure
       ? " Verify NEXT_PUBLIC_SUPABASE_URL, keys, and outbound network access."

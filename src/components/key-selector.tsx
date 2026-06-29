@@ -17,9 +17,9 @@ interface KeySelectorProps {
 
 function optionButtonClass(isActive: boolean): string {
   if (isActive) {
-    return `${optionBClassNames.body} rounded-xl bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent)]/90`;
+    return `${optionBClassNames.body} min-h-[44px] rounded-xl bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent-hover)]`;
   }
-  return `${optionBClassNames.body} rounded-xl border-[var(--song-border)] bg-[var(--song-surface-soft)] text-[var(--song-text)] hover:bg-[var(--song-surface-highlight)]`;
+  return `${optionBClassNames.body} min-h-[44px] rounded-xl border-[var(--song-border)] bg-[var(--song-surface-soft)] text-[var(--song-text)] hover:bg-[var(--song-surface-highlight)]`;
 }
 
 export function KeySelector({
@@ -33,7 +33,7 @@ export function KeySelector({
     <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
       <CardHeader>
         <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-          Tonalite
+          Key
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -63,7 +63,7 @@ export function KeySelector({
               }
             }}
           >
-            Revenir a la tonalite d&apos;origine
+            Reset to original key
           </Button>
           <Button
             variant={notationPreference === "auto" ? "default" : "outline"}
@@ -81,7 +81,7 @@ export function KeySelector({
             disabled={disabled}
             onClick={() => currentKey && onSelectKey(currentKey, "sharps")}
           >
-            Dieses
+            Sharps
           </Button>
           <Button
             variant={notationPreference === "flats" ? "default" : "outline"}
@@ -90,7 +90,7 @@ export function KeySelector({
             disabled={disabled}
             onClick={() => currentKey && onSelectKey(currentKey, "flats")}
           >
-            Bemols
+            Flats
           </Button>
         </div>
       </CardContent>

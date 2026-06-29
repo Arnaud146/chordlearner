@@ -8,11 +8,11 @@ import { getClientIp } from "@/lib/security/request-client";
 import { createClient } from "@/lib/supabase/server";
 
 const signupSchema = z.object({
-  email: z.string().trim().email("Email invalide"),
+  email: z.string().trim().email("Invalid email"),
   password: z
     .string()
-    .min(10, "Mot de passe trop court (10 caracteres min)")
-    .max(128, "Mot de passe trop long"),
+    .min(10, "Password too short (10 characters min)")
+    .max(128, "Password too long"),
   nextPath: z.string().optional(),
 });
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         ip: clientIp,
         payload: { used: ipLimit.used, limit: SIGNUP_IP_LIMIT },
       });
-      return apiError("Trop de tentatives. Reessayez plus tard.", 429);
+      return apiError("Too many attempts. Please try again later.", 429);
     }
 
     const emailLimit = await consumeRateLimit({
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         ip: clientIp,
         payload: { email, used: emailLimit.used, limit: SIGNUP_EMAIL_LIMIT },
       });
-      return apiError("Trop de tentatives sur cet email. Reessayez plus tard.", 429);
+      return apiError("Too many attempts for this email. Please try again later.", 429);
     }
 
     const supabase = await createClient();
@@ -77,9 +77,9 @@ export async function POST(request: NextRequest) {
     if (error) {
       const msg = error.message;
       if (msg === "User already registered") {
-        return apiError("Un compte existe deja avec cet email.", 409);
+        return apiError("An account already exists with this email.", 409);
       }
-      return apiError("Inscription impossible pour le moment.", 400);
+      return apiError("Sign-up is not possible right now.", 400);
     }
 
     await emitSecurityEvent({
@@ -94,13 +94,13 @@ export async function POST(request: NextRequest) {
         hasSession: Boolean(data.session),
         message: data.session
           ? null
-          : "Compte cree. Verifie ton e-mail pour confirmer l'inscription.",
+          : "Account created. Check your email to confirm your registration.",
       },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return apiError(error.issues[0]?.message ?? "Payload invalide", 400);
+      return apiError(error.issues[0]?.message ?? "Invalid payload", 400);
     }
-    return apiError("Erreur d'inscription.", 500);
+    return apiError("Sign-up error.", 500);
   }
 }

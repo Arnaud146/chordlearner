@@ -189,7 +189,7 @@ function sanitizeSectionLabel(text: string): string {
 export function extractBoiteAChansonsRawLines(html: string): string[] {
   const partitionStart = html.indexOf('id="divPartition"');
   if (partitionStart < 0) {
-    throw new Error("Bloc divPartition introuvable.");
+    throw new Error("divPartition block not found.");
   }
 
   const segmentAfterStart = html.slice(partitionStart);
@@ -204,7 +204,7 @@ export function extractBoiteAChansonsRawLines(html: string): string[] {
   );
 
   if (lineBlocks.length === 0) {
-    throw new Error("Aucune ligne de partition pL/pLI detectee.");
+    throw new Error("No pL/pLI score line detected.");
   }
 
   const lines: string[] = [];
@@ -275,7 +275,7 @@ const genericExtractor: HtmlExtractor = {
     const best = extracted.bestBlock;
 
     if (!best) {
-      throw new Error("Bloc principal introuvable pour la chanson.");
+      throw new Error("Main block not found for the song.");
     }
 
     const cleanedLines = best.lines
@@ -284,7 +284,7 @@ const genericExtractor: HtmlExtractor = {
     const filteredLines = stripTranspositionControls(cleanedLines);
 
     if (filteredLines.length === 0) {
-      throw new Error("Aucune ligne exploitable detectee dans la page.");
+      throw new Error("No usable line detected on the page.");
     }
 
     return {
@@ -322,7 +322,7 @@ export function parseSongFromHtml(input: ParseSongFromHtmlInput): ParseSongFromH
   });
 
   if (song.allChords.length < 2) {
-    throw new Error("Aucun bloc accords/paroles fiable n'a ete detecte.");
+    throw new Error("No reliable chords/lyrics block was detected.");
   }
 
   return {

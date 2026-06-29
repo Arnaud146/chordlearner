@@ -7,11 +7,15 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 function buildCsp(): string {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const isDev = process.env.NODE_ENV === "development";
   const connectSrc = [
     "'self'",
     ...(supabaseUrl ? [supabaseUrl] : []),
     ...(upstashUrl ? [upstashUrl] : []),
   ];
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'";
 
   return [
     "default-src 'self'",
@@ -22,9 +26,9 @@ function buildCsp(): string {
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     "style-src 'self' 'unsafe-inline'",
-    "script-src 'self' 'unsafe-inline'",
+    scriptSrc,
     `connect-src ${connectSrc.join(" ")}`,
-    "upgrade-insecure-requests",
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
 }
 
@@ -47,6 +51,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
+  },
+  experimental: {
+    optimizePackageImports: ["lucide-react", "radix-ui"],
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

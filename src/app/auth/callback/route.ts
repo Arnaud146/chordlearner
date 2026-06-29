@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(nextPath, requestUrl.origin));
   } catch {
     const loginUrl = new URL("/login", requestUrl.origin);
-    loginUrl.searchParams.set("error", "Lien d'authentification invalide ou expire.");
+    loginUrl.searchParams.set("error", "Invalid or expired authentication link.");
     return NextResponse.redirect(loginUrl);
   }
 }

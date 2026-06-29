@@ -19,7 +19,7 @@ export async function requireAuth(supabase: SupabaseClient): Promise<User> {
 
 export class AuthRequiredError extends Error {
   constructor() {
-    super("Authentification requise");
+    super("Authentication required");
     this.name = "AuthRequiredError";
   }
 }

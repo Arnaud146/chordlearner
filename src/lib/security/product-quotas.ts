@@ -67,6 +67,10 @@ export async function consumeProductQuota(params: {
       p_month_limit: params.monthLimit,
     });
     if (res.error || !res.data?.[0]) {
+      console.error(
+        "[product-quotas] RPC error — is the consume_product_quota function deployed?",
+        res.error?.message ?? "no data",
+      );
       return { allowed: false, reason: "unknown" };
     }
     const row = res.data[0];
@@ -82,7 +86,11 @@ export async function consumeProductQuota(params: {
       dayUsed: Number(row.day_used ?? 0),
       monthUsed: Number(row.month_used ?? 0),
     };
-  } catch {
+  } catch (error) {
+    console.error(
+      "[product-quotas] quota check failed — is the consume_product_quota function deployed?",
+      error instanceof Error ? error.message : "unknown",
+    );
     return { allowed: false, reason: "unknown" };
   }
 }

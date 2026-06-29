@@ -44,6 +44,16 @@ function getEnvOrThrow(key: string): string {
   return value;
 }
 
+function forwardWithPathname(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isProtected = isProtectedPath(pathname);
@@ -54,7 +64,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!isProtected && !isAuthPage) {
-    return NextResponse.next({ request });
+    return forwardWithPathname(request);
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -66,9 +76,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  let response = NextResponse.next({
-    request,
-  });
+  let response = forwardWithPathname(request);
 
   const supabase = createServerClient(
     getEnvOrThrow("NEXT_PUBLIC_SUPABASE_URL"),
@@ -82,9 +90,7 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({
-            request,
-          });
+          response = forwardWithPathname(request);
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
@@ -124,6 +130,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

@@ -40,6 +40,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
       },
     });
   } catch (error) {
-    return handleApiError(error, "Impossible de charger les voicings");
+    return handleApiError(error, "Unable to load the voicings");
   }
 }

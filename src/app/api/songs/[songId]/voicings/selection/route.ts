@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const defaultOption = pickDefaultVoicingOption(options);
 
     if (!defaultOption) {
-      return apiError("Aucun voicing disponible pour cet accord", 400);
+      return apiError("No voicing available for this chord", 400);
     }
 
     const fallbackSelection = await getOrCreateDefaultSelection({
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       },
     });
   } catch (error) {
-    return handleApiError(error, "Impossible de charger la selection de voicing");
+    return handleApiError(error, "Unable to load the voicing selection");
   }
 }
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       (option) => option.id === payload.selectedVoicingOptionId,
     );
     if (!selectedExists) {
-      return apiError("Le voicing selectionne est invalide", 400);
+      return apiError("The selected voicing is invalid", 400);
     }
 
     const savedSelection = await repo.upsertUserVoicingSelection({
@@ -96,6 +96,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: savedSelection });
   } catch (error) {
-    return handleApiError(error, "Impossible de sauvegarder la selection de voicing");
+    return handleApiError(error, "Unable to save the voicing selection");
   }
 }

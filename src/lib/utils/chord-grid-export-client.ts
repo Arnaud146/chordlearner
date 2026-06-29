@@ -88,7 +88,7 @@ export async function exportChordGridPdf(
       }),
     );
   } catch {
-    throw new Error("Impossible d'exporter la grille en PDF.");
+    throw new Error("Unable to export the chart to PDF.");
   }
 }
 
@@ -106,7 +106,7 @@ export async function exportChordGridPngPages(
       canvas.height = height;
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        throw new Error("Canvas indisponible");
+        throw new Error("Canvas unavailable");
       }
 
       ctx.fillStyle = "#ffffff";
@@ -120,7 +120,7 @@ export async function exportChordGridPngPages(
       );
 
       if (!blob) {
-        throw new Error("Generation PNG impossible");
+        throw new Error("PNG generation failed");
       }
 
       triggerDownload(
@@ -135,6 +135,6 @@ export async function exportChordGridPngPages(
       );
     }
   } catch {
-    throw new Error("Impossible d'exporter la grille en PNG.");
+    throw new Error("Unable to export the chart to PNG.");
   }
 }

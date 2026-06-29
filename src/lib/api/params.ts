@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 const songIdParamSchema = z.object({
-  songId: z.string().uuid("songId invalide"),
+  songId: z.string().uuid("Invalid songId"),
 });
 
 const presetIdParamSchema = z.object({
-  songId: z.string().uuid("songId invalide"),
-  presetId: z.string().uuid("presetId invalide"),
+  songId: z.string().uuid("Invalid songId"),
+  presetId: z.string().uuid("Invalid presetId"),
 });
 
 export async function parseSongIdParam(

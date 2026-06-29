@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-export const notationPreferenceSchema = z.enum(["auto", "sharps", "flats"]);
+const notationPreferenceSchema = z.enum(["auto", "sharps", "flats"]);
 
 export const createSongSchema = z.object({
-  title: z.string().trim().min(1, "Le titre est requis"),
+  title: z.string().trim().min(1, "Title is required"),
   artist: z.string().trim().min(1).optional().nullable(),
   originalKey: z.string().trim().min(1).optional().nullable(),
   sourceType: z.enum(["manual", "ocr_image", "web_page"]).default("manual"),
@@ -21,7 +21,7 @@ export const updateSongSchema = z
     normalizedText: z.string().nullable().optional(),
   })
   .refine((payload) => Object.keys(payload).length > 0, {
-    message: "Aucun champ à mettre à jour",
+    message: "No field to update",
   });
 
 export const parseManualSchema = z.object({
@@ -34,8 +34,3 @@ export const transposeSongSchema = z.object({
   toKey: z.enum(["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]),
   notationPreference: notationPreferenceSchema.default("auto"),
 });
-
-export type CreateSongInput = z.infer<typeof createSongSchema>;
-export type UpdateSongInput = z.infer<typeof updateSongSchema>;
-export type ParseManualInput = z.infer<typeof parseManualSchema>;
-export type TransposeSongInput = z.infer<typeof transposeSongSchema>;

@@ -187,7 +187,7 @@ describe("ocr service", () => {
 
     await expect(
       detectTextWithGoogleVision("https://example.com/chords.pdf"),
-    ).rejects.toThrow("Google Vision PDF async non configure");
+    ).rejects.toThrow("Google Vision async PDF not configured");
 
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -209,7 +209,7 @@ describe("ocr service", () => {
 
     await expect(
       detectTextWithGoogleVision("https://example.com/private-image.png"),
-    ).rejects.toThrow("ne peut pas acceder a l'URL");
+    ).rejects.toThrow("cannot access the provided URL");
   });
 
   it("extracts positioned rows for Google Vision async PDF flow", async () => {

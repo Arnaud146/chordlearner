@@ -18,15 +18,15 @@ export function ExtractionResultView({ result }: ExtractionResultViewProps) {
     <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
       <CardHeader className="space-y-2">
         <CardTitle className={`${optionBClassNames.display} text-3xl font-bold text-[var(--song-text)]`}>
-          Resultat extraction
+          Extraction result
         </CardTitle>
         <div className="flex flex-wrap gap-2 text-xs">
           <Badge variant={result.success ? "secondary" : "destructive"}>
-            {result.success ? "succes" : "echec"}
+            {result.success ? "success" : "failure"}
           </Badge>
           <Badge variant="outline">mode: {result.mode}</Badge>
           <Badge variant="outline">
-            fallback: {result.fallbackUsed ? "oui" : "non"}
+            fallback: {result.fallbackUsed ? "yes" : "no"}
           </Badge>
         </div>
       </CardHeader>
@@ -35,17 +35,17 @@ export function ExtractionResultView({ result }: ExtractionResultViewProps) {
           <>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-[var(--song-border-soft)] bg-[var(--song-surface-soft)] p-3 text-sm">
-                <p className="font-medium">Sections detectees</p>
+                <p className="font-medium">Detected sections</p>
                 <p className="text-[var(--song-text-muted)]">{result.song.stats.sections}</p>
               </div>
               <div className="rounded-xl border border-[var(--song-border-soft)] bg-[var(--song-surface-soft)] p-3 text-sm">
-                <p className="font-medium">Lignes accords</p>
+                <p className="font-medium">Chord lines</p>
                 <p className="text-[var(--song-text-muted)]">{result.song.stats.chordLines}</p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">Accords uniques</p>
+              <p className="text-sm font-medium">Unique chords</p>
               <ChordBadges chords={result.song.allChords} />
             </div>
           </>
@@ -57,20 +57,20 @@ export function ExtractionResultView({ result }: ExtractionResultViewProps) {
               value="preview"
               className={`${optionBClassNames.body} rounded-lg border border-transparent px-3 py-2 text-sm font-semibold text-[var(--song-text-muted)] data-[state=active]:border-[var(--song-border)] data-[state=active]:bg-[var(--song-surface)] data-[state=active]:text-[var(--song-text)]`}
             >
-              Apercu structure
+              Structured preview
             </TabsTrigger>
             <TabsTrigger
               value="debug"
               className={`${optionBClassNames.body} rounded-lg border border-transparent px-3 py-2 text-sm font-semibold text-[var(--song-text-muted)] data-[state=active]:border-[var(--song-border)] data-[state=active]:bg-[var(--song-surface)] data-[state=active]:text-[var(--song-text)]`}
             >
-              JSON brut
+              Raw JSON
             </TabsTrigger>
           </TabsList>
           <TabsContent value="preview">
             {result.song ? (
               <StructuredSongPreview song={result.song} />
             ) : (
-              <p className="text-sm text-[var(--song-text-muted)]">Aucun resultat structure.</p>
+              <p className="text-sm text-[var(--song-text-muted)]">No structured result.</p>
             )}
           </TabsContent>
           <TabsContent value="debug">

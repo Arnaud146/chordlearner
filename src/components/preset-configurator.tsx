@@ -45,8 +45,8 @@ interface PresetDetail {
 async function fetchApi<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   const payload = (await response.json()) as { data?: T; error?: string };
-  if (!response.ok) throw new Error(payload.error ?? "Erreur API");
-  if (!payload.data) throw new Error("Reponse API invalide");
+  if (!response.ok) throw new Error(payload.error ?? "API error");
+  if (!payload.data) throw new Error("Invalid API response");
   return payload.data;
 }
 
@@ -293,7 +293,7 @@ export function PresetConfigurator({
     .sort((a, b) => b.occurrence_count - a.occurrence_count);
 
   if (loading) {
-    return <LoadingStateCard label="Chargement des plans..." lines={4} />;
+    return <LoadingStateCard label="Loading plans..." lines={4} />;
   }
 
   return (
@@ -302,7 +302,7 @@ export function PresetConfigurator({
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
             <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[#2d2a24]`}>
-              Plan de jeu
+              Practice plan
             </CardTitle>
             <SaveStatus status={saveStatus} />
           </div>
@@ -317,7 +317,7 @@ export function PresetConfigurator({
                 <SelectTrigger
                   className={`${optionBClassNames.body} w-[220px] rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#3a342b]`}
                 >
-                  <SelectValue placeholder="SÃ©lectionner un plan" />
+                  <SelectValue placeholder="Select a plan" />
                 </SelectTrigger>
                 <SelectContent>
                   {presets.map((preset) => (
@@ -329,7 +329,7 @@ export function PresetConfigurator({
               </Select>
             ) : (
               <p className={`${optionBClassNames.body} text-sm text-[#6b6254]`}>
-                Aucun plan de jeu.
+                No practice plan.
               </p>
             )}
             <Button
@@ -337,7 +337,7 @@ export function PresetConfigurator({
               onClick={handleCreatePreset}
               className={`${optionBClassNames.body} rounded-sm bg-[#2d2a24] text-[#f8f4ea] hover:bg-[#2d2a24]/90`}
             >
-              Nouveau plan
+              New plan
             </Button>
             {selectedPreset ? (
               <>
@@ -367,7 +367,7 @@ export function PresetConfigurator({
                       onClick={() => setIsRenaming(false)}
                       className={`${optionBClassNames.body} rounded-sm text-[#5a5246] hover:bg-[#efe6d6]`}
                     >
-                      Annuler
+                      Cancel
                     </Button>
                   </div>
                 ) : (
@@ -380,7 +380,7 @@ export function PresetConfigurator({
                       setIsRenaming(true);
                     }}
                   >
-                    Renommer
+                    Rename
                   </Button>
                 )}
                 <div className="relative">
@@ -391,14 +391,14 @@ export function PresetConfigurator({
                     className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246] hover:bg-[#efe6d6]`}
                     onClick={() => setIsDeleteConfirmOpen((prev) => !prev)}
                     disabled={saveStatus === "saving"}
-                    aria-label="Supprimer le plan"
+                    aria-label="Delete plan"
                   >
                     <X className="size-3.5" />
                   </Button>
                   {isDeleteConfirmOpen ? (
                     <div className="absolute top-8 right-0 z-20 w-52 rounded-sm border border-[#d9ccb2] bg-white p-3 shadow-sm">
                       <p className={`${optionBClassNames.body} text-xs text-[#5a5246]`}>
-                        Supprimer ce plan ?
+                        Delete this plan?
                       </p>
                       <div className="mt-2 flex items-center justify-end gap-2">
                         <Button
@@ -409,7 +409,7 @@ export function PresetConfigurator({
                           onClick={() => setIsDeleteConfirmOpen(false)}
                           disabled={saveStatus === "saving"}
                         >
-                          Annuler
+                          Cancel
                         </Button>
                         <Button
                           type="button"
@@ -419,7 +419,7 @@ export function PresetConfigurator({
                           onClick={handleDeletePreset}
                           disabled={saveStatus === "saving"}
                         >
-                          {saveStatus === "saving" ? "..." : "Supprimer"}
+                          {saveStatus === "saving" ? "..." : "Delete"}
                         </Button>
                       </div>
                     </div>
@@ -431,10 +431,10 @@ export function PresetConfigurator({
           {selectedPreset ? (
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>
-                TonalitÃ© : {selectedPreset.key_snapshot}
+                Key: {selectedPreset.key_snapshot}
               </Badge>
               <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>
-                Notation : {selectedPreset.notation_snapshot}
+                Notation: {selectedPreset.notation_snapshot}
               </Badge>
             </div>
           ) : null}
@@ -497,7 +497,7 @@ export function PresetConfigurator({
                       className={`${optionBClassNames.body} inline-flex items-center gap-2 text-xs text-[var(--song-text-subtle)]`}
                     >
                       <Loader2 className="size-3 animate-spin" />
-                      Chargement des voicings...
+                      Loading voicings...
                     </p>
                   )}
                   <MiniPiano
@@ -514,7 +514,7 @@ export function PresetConfigurator({
       ) : selectedPreset ? (
         <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
           <CardContent className={`${optionBClassNames.body} pt-6 text-sm text-[#6b6254]`}>
-            Aucun accord supportÃ© dans ce morceau.
+            No supported chords in this song.
           </CardContent>
         </Card>
       ) : null}

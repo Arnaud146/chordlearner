@@ -14,7 +14,7 @@ export async function GET() {
     const songs = await repo.listSongs();
     return NextResponse.json({ data: songs });
   } catch (error) {
-    return handleApiError(error, "Impossible de lister les chansons");
+    return handleApiError(error, "Unable to list the songs");
   }
 }
 
@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
 
     await presetRepo.createPreset({
       song_id: created.id,
-      name: "Plan de jeu 1",
+      name: "Practice plan 1",
       key_snapshot: created.current_key ?? created.original_key ?? "C",
       notation_snapshot: created.notation_preference,
     });
 
     return NextResponse.json({ data: created }, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "Impossible de creer la chanson");
+    return handleApiError(error, "Unable to create the song");
   }
 }

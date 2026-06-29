@@ -16,11 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { parseChordSymbol } from "@/lib/domain/chords/chord-parser";
+import { noteToMidi } from "@/lib/domain/voicings/piano-layout";
 import { buildChordGridExportModel } from "@/lib/domain/export/chord-grid-export";
 import {
   exportChordGridPdf,
   exportChordGridPngPages,
 } from "@/lib/utils/chord-grid-export-client";
+import {
+  exportPracticePlanPdf,
+  type PracticePlanExportModel,
+} from "@/lib/utils/practice-plan-export";
 import type {
   ChordOccurrenceRow,
   ChordVoicingOptionRow,
@@ -56,9 +62,19 @@ interface TransitionGroup {
 async function fetchApi<T>(url: string): Promise<T> {
   const response = await fetch(url);
   const payload = (await response.json()) as { data?: T; error?: string };
-  if (!response.ok) throw new Error(payload.error ?? "Erreur API");
-  if (!payload.data) throw new Error("Reponse API invalide");
+  if (!response.ok) throw new Error(payload.error ?? "API error");
+  if (!payload.data) throw new Error("Invalid API response");
   return payload.data;
+}
+
+function getSlashBass(symbol: string): { note: string; midi: number } | null {
+  const parsed = parseChordSymbol(symbol);
+  if (!parsed.slashBass) return null;
+  try {
+    return { note: parsed.slashBass, midi: noteToMidi(parsed.slashBass, 3) };
+  } catch {
+    return null;
+  }
 }
 
 function extractFingering(voicing: ChordVoicingOptionRow | null): number[] {
@@ -142,6 +158,7 @@ export function PresetOverview({
   >(new Map());
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isExportingPng, setIsExportingPng] = useState(false);
+  const [isExportingPlan, setIsExportingPlan] = useState(false);
   const [exportNotice, setExportNotice] = useState<{
     kind: "success" | "error";
     message: string;
@@ -318,7 +335,7 @@ export function PresetOverview({
       await exportChordGridPdf(exportModel);
       setExportNotice({
         kind: "success",
-        message: "Export PDF termine.",
+        message: "PDF export complete.",
       });
     } catch (error) {
       setExportNotice({
@@ -326,7 +343,7 @@ export function PresetOverview({
         message:
           error instanceof Error
             ? error.message
-            : "Impossible d'exporter la grille en PDF.",
+            : "Unable to export the chart to PDF.",
       });
     } finally {
       setIsExportingPdf(false);
@@ -342,8 +359,8 @@ export function PresetOverview({
         kind: "success",
         message:
           exportModel.pages.length > 1
-            ? `Export PNG termine (${exportModel.pages.length} pages).`
-            : "Export PNG termine.",
+            ? `PNG export complete (${exportModel.pages.length} pages).`
+            : "PNG export complete.",
       });
     } catch (error) {
       setExportNotice({
@@ -351,23 +368,64 @@ export function PresetOverview({
         message:
           error instanceof Error
             ? error.message
-            : "Impossible d'exporter la grille en PNG.",
+            : "Unable to export the chart to PNG.",
       });
     } finally {
       setIsExportingPng(false);
     }
   }
 
+  async function handleExportPracticePlan() {
+    setExportNotice(null);
+    setIsExportingPlan(true);
+    try {
+      const planChords = uniqueSymbols.map((symbol) => {
+        const voicing = getResolvedVoicing(symbol);
+        const fingering = extractFingering(voicing);
+        const slashBass = getSlashBass(symbol);
+        return {
+          symbol,
+          occurrenceCount: occurrenceCountBySymbol.get(symbol) ?? 0,
+          notesMidi: voicing?.notes_midi ?? [],
+          slashBassMidi: slashBass?.midi ?? null,
+          fingering,
+        };
+      });
+
+      const planModel: PracticePlanExportModel = {
+        title: songTitle,
+        artist: songArtist?.trim() || "Unknown artist",
+        key: currentKey ?? "Not set",
+        notation: notationPreference,
+        chords: planChords,
+        transitions: transitionGroups,
+      };
+
+      await exportPracticePlanPdf(planModel);
+      setExportNotice({ kind: "success", message: "Practice plan exported." });
+    } catch (error) {
+      setExportNotice({
+        kind: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to export the practice plan.",
+      });
+    } finally {
+      setIsExportingPlan(false);
+    }
+  }
+
   if (loading) {
-    return <LoadingStateCard label="Chargement de la vue d'ensemble..." lines={4} />;
+    return <LoadingStateCard label="Loading overview..." lines={4} />;
   }
 
   if (presets.length === 0) {
     return (
       <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
         <CardContent className={`${optionBClassNames.body} pt-6 text-sm text-[#6b6254]`}>
-          Aucun plan de jeu crÃ©Ã©. Rendez-vous dans l&apos;onglet
-          &laquo;&nbsp;Configurer&nbsp;&raquo; pour en crÃ©er un.
+          No practice plan created yet. Go to the
+          &laquo;&nbsp;Configure&nbsp;&raquo; tab to create one.
         </CardContent>
       </Card>
     );
@@ -381,7 +439,7 @@ export function PresetOverview({
             <CardTitle
               className={`${optionBClassNames.display} text-4xl font-bold text-[#2d2a24]`}
             >
-              Vue d&apos;ensemble
+              Overview
             </CardTitle>
             <div className="flex flex-wrap items-center gap-2">
               <Button
@@ -393,7 +451,7 @@ export function PresetOverview({
                 disabled={!canExport || isExportingPdf || isExportingPng}
               >
                 <Download className="size-3.5" />
-                {isExportingPdf ? "Export PDF..." : "Exporter PDF"}
+                {isExportingPdf ? "Exporting PDF..." : "Export PDF"}
               </Button>
               <Button
                 type="button"
@@ -404,7 +462,18 @@ export function PresetOverview({
                 disabled={!canExport || isExportingPdf || isExportingPng}
               >
                 <Download className="size-3.5" />
-                {isExportingPng ? "Export PNG..." : "Exporter PNG"}
+                {isExportingPng ? "Exporting PNG..." : "Export PNG"}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#3a342b] hover:bg-[#efe6d6]`}
+                onClick={() => void handleExportPracticePlan()}
+                disabled={!canExport || isExportingPdf || isExportingPng || isExportingPlan}
+              >
+                <Download className="size-3.5" />
+                {isExportingPlan ? "Exporting..." : "Practice Plan"}
               </Button>
             </div>
           </div>
@@ -418,7 +487,7 @@ export function PresetOverview({
               <SelectTrigger
                 className={`${optionBClassNames.body} w-[220px] rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#3a342b]`}
               >
-                <SelectValue placeholder="SÃ©lectionner un plan" />
+                <SelectValue placeholder="Select a plan" />
               </SelectTrigger>
               <SelectContent>
                 {presets.map((preset) => (
@@ -431,17 +500,17 @@ export function PresetOverview({
             {selectedPreset ? (
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>
-                  TonalitÃ© : {selectedPreset.key_snapshot}
+                  Key: {selectedPreset.key_snapshot}
                 </Badge>
                 <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>
-                  Notation : {selectedPreset.notation_snapshot}
+                  Notation: {selectedPreset.notation_snapshot}
                 </Badge>
               </div>
             ) : null}
           </div>
           {!canExport ? (
             <p className={`${optionBClassNames.body} text-xs text-[#6b6254]`}>
-              Export indisponible: aucune ligne d&apos;accord a exporter.
+              Export unavailable: no chord lines to export.
             </p>
           ) : null}
           {exportNotice ? (
@@ -462,21 +531,22 @@ export function PresetOverview({
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <CardTitle className={`${optionBClassNames.display} text-3xl font-bold text-[#2d2a24]`}>
-                  Accords a apprendre (uniques)
+                  Chords to learn (unique)
                 </CardTitle>
-                <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>{uniqueSymbols.length} accords differents</Badge>
+                <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>{uniqueSymbols.length} distinct chords</Badge>
               </div>
             </CardHeader>
             <CardContent>
               {uniqueSymbols.length === 0 ? (
                 <p className={`${optionBClassNames.body} text-sm text-[#6b6254]`}>
-                  Aucun accord trouve.
+                  No chords found.
                 </p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {uniqueSymbols.map((symbol) => {
                     const voicing = getResolvedVoicing(symbol);
                     const fingering = extractFingering(voicing);
+                    const slashBass = getSlashBass(symbol);
                     return (
                       <div
                         key={symbol}
@@ -490,8 +560,17 @@ export function PresetOverview({
                             {occurrenceCountBySymbol.get(symbol) ?? 0}x
                           </Badge>
                         </div>
-                        <MiniPiano activeNotesMidi={voicing?.notes_midi ?? []} />
+                        <MiniPiano
+                          activeNotesMidi={voicing?.notes_midi ?? []}
+                          slashBassMidi={slashBass?.midi ?? null}
+                        />
                         <FingeringHintBadge fingering={fingering} />
+                        {slashBass ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-sm border border-[var(--song-bass)] bg-[var(--song-bass-surface)] px-2 py-0.5 text-[11px] font-medium text-[var(--song-bass-foreground)]">
+                            <span className="inline-block size-2 rounded-full bg-[var(--song-bass)]" />
+                            Left-hand bass: {slashBass.note}
+                          </span>
+                        ) : null}
                       </div>
                     );
                   })}
@@ -504,20 +583,20 @@ export function PresetOverview({
             <CardHeader>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <CardTitle className={`${optionBClassNames.display} text-3xl font-bold text-[#2d2a24]`}>
-                  Transitions (groupes par lignes)
+                  Transitions (grouped by lines)
                 </CardTitle>
-                <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>{transitionGroups.length} blocs uniques</Badge>
+                <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>{transitionGroups.length} unique blocks</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {transitionGroups.length === 0 ? (
                 <p className={`${optionBClassNames.body} text-sm text-[#6b6254]`}>
-                  Pas assez de lignes avec transitions detectees.
+                  Not enough lines with detected transitions.
                 </p>
               ) : (
                 <>
                   <p className={`${optionBClassNames.body} text-xs text-[#6b6254]`}>
-                    Les transitions sont affichees sans suggestion de voicing ou doigte.
+                    Transitions are shown without voicing or fingering suggestions.
                   </p>
                   {transitionGroups.map((group, chunkIndex) => (
                     <div
@@ -526,9 +605,9 @@ export function PresetOverview({
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className={`${optionBClassNames.body} text-sm font-semibold text-[#3f392f]`}>
-                          Bloc {chunkIndex + 1}
+                          Block {chunkIndex + 1}
                         </p>
-                        <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>{group.occurrences}x dans la chanson</Badge>
+                        <Badge variant="outline" className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#5a5246]`}>{group.occurrences}x in the song</Badge>
                       </div>
                       <div className="overflow-x-auto">
                         <div className="flex min-w-max items-center gap-2">

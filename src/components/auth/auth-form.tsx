@@ -65,7 +65,7 @@ export function AuthForm({
         error?: string;
       };
       if (!signupRes.ok || !signupPayload.data) {
-        throw new Error(signupPayload.error ?? "Inscription impossible");
+        throw new Error(signupPayload.error ?? "Sign-up failed");
       }
 
       if (signupPayload.data.hasSession) {
@@ -74,16 +74,16 @@ export function AuthForm({
         return;
       }
 
-      setSuccessMessage(signupPayload.data.message ?? "Inscription terminee.");
+      setSuccessMessage(signupPayload.data.message ?? "Sign-up complete.");
     } catch (error) {
       const rawMsg = error instanceof Error ? error.message : "";
       const safeMessages: Record<string, string> = {
-        "Invalid login credentials": "Email ou mot de passe incorrect.",
-        "Email not confirmed": "Verifie ton e-mail pour confirmer l'inscription.",
-        "User already registered": "Un compte existe deja avec cet email.",
+        "Invalid login credentials": "Incorrect email or password.",
+        "Email not confirmed": "Check your email to confirm your registration.",
+        "User already registered": "An account already exists with this email.",
       };
       setErrorMessage(
-        safeMessages[rawMsg] ?? "Erreur d'authentification. Reessaye plus tard.",
+        safeMessages[rawMsg] ?? "Authentication error. Please try again later.",
       );
     } finally {
       setIsSubmitting(false);
@@ -101,7 +101,7 @@ export function AuthForm({
 
       {errorMessage ? (
         <Alert variant="destructive">
-          <AlertTitle>Erreur</AlertTitle>
+          <AlertTitle>Error</AlertTitle>
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       ) : null}
@@ -115,51 +115,51 @@ export function AuthForm({
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="toi@email.com"
+          placeholder="you@email.com"
           disabled={isSubmitting}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`${mode}-password`}>Mot de passe</Label>
+        <Label htmlFor={`${mode}-password`}>Password</Label>
         <Input
           id={`${mode}-password`}
           type="password"
           autoComplete={mode === "login" ? "current-password" : "new-password"}
           required
-          minLength={8}
+          minLength={10}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="Minimum 8 caracteres"
+          placeholder="At least 10 characters"
           disabled={isSubmitting}
         />
       </div>
 
       <Button
         type="submit"
-        className="w-full bg-[#2d2a24] text-[#f8f4ea] hover:bg-[#2d2a24]/90"
+        className="min-h-[44px] w-full bg-[var(--song-accent)] text-[var(--song-accent-foreground)] hover:bg-[var(--song-accent-hover)]"
         disabled={isSubmitting}
       >
         {isSubmitting
-          ? "Chargement..."
+          ? "Loading..."
           : mode === "login"
-            ? "Se connecter"
-            : "Creer mon compte"}
+            ? "Log in"
+            : "Create my account"}
       </Button>
 
-      <p className="text-center text-sm text-[#5a5246]">
+      <p className="text-center text-sm text-[var(--song-text-muted)]">
         {mode === "login" ? (
           <>
-            Pas encore de compte ?{" "}
+            No account yet?{" "}
             <Link href={`/signup?next=${encodeURIComponent(nextPath)}`} className="underline">
-              S&apos;inscrire
+              Sign up
             </Link>
           </>
         ) : (
           <>
-            Deja un compte ?{" "}
+            Already have an account?{" "}
             <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="underline">
-              Se connecter
+              Log in
             </Link>
           </>
         )}

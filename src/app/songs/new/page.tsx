@@ -11,16 +11,16 @@ export default function NewSongPage() {
         <p
           className={`${optionBClassNames.body} text-xs font-semibold uppercase tracking-[0.14em] text-[var(--song-text-subtle)]`}
         >
-          Nouveau morceau
+          New song
         </p>
         <h1 className={`${optionBClassNames.display} text-5xl leading-[0.95] font-bold md:text-7xl`}>
-          Ajoute un morceau
+          Add a song
           <br />
-          a ton entrainement.
+          to your practice.
         </h1>
         <p className={`${optionBClassNames.body} max-w-3xl text-lg text-[var(--song-text-muted)] md:text-xl`}>
-          Choisis clairement ton mode d&apos;import: URL web pour extraction automatique, ou
-          fichier image/PDF pour OCR.
+          Clearly choose your import method: a web URL for automatic extraction, or
+          an image/PDF file for OCR.
         </p>
       </section>
 
@@ -31,7 +31,7 @@ export default function NewSongPage() {
           <div className="flex items-center gap-2">
             <div className="h-px flex-1 bg-[var(--song-border)]" />
             <span className={`${optionBClassNames.body} text-sm text-[var(--song-text-subtle)]`}>
-              ou saisis la grille manuellement
+              or enter the chart manually
             </span>
             <div className="h-px flex-1 bg-[var(--song-border)]" />
           </div>
@@ -41,12 +41,12 @@ export default function NewSongPage() {
 
         <aside className="h-fit rounded-2xl border border-[var(--song-border)] bg-[var(--song-surface-muted)] p-5 shadow-[var(--song-shadow)]">
           <h2 className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-            Conseils
+            Tips
           </h2>
           <ul className={`${optionBClassNames.body} mt-3 space-y-2 text-sm text-[var(--song-text-muted)]`}>
-            <li>Garde des retours a la ligne clairs entre les groupes d&apos;accords.</li>
-            <li>Ajoute la tonalite d&apos;origine des que tu la connais.</li>
-            <li>Relis le resultat OCR avant validation finale.</li>
+            <li>Keep clear line breaks between chord groups.</li>
+            <li>Add the original key as soon as you know it.</li>
+            <li>Review the OCR result before final confirmation.</li>
           </ul>
         </aside>
       </section>

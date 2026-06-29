@@ -3,7 +3,7 @@ import { suggestRightHandFingering } from "./fingering-engine";
 import { computeDifficultyScore } from "./voicing-heuristics";
 import { midiToScientific, noteToMidi } from "./piano-layout";
 
-export type HandMode = "RH" | "BH";
+type HandMode = "RH" | "BH";
 
 export interface VoicingOption {
   handMode: HandMode;

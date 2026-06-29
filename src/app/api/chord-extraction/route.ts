@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         payload: { used: ipLimit.used, limit: CHORD_EXTRACTION_IP_LIMIT },
       });
       return NextResponse.json(
-        { error: "Trop de requetes d'extraction depuis cette IP. Reessayez plus tard." },
+        { error: "Too many extraction requests from this IP. Please try again later." },
         { status: 429 },
       );
     }
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         payload: { used: userLimit.used, limit: CHORD_EXTRACTION_USER_LIMIT },
       });
       return NextResponse.json(
-        { error: "Quota horaire d'extraction atteint. Reessayez plus tard." },
+        { error: "Hourly extraction quota reached. Please try again later." },
         { status: 429 },
       );
     }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         ip: clientIp,
         payload: { reason: quota.reason, dayUsed: quota.dayUsed, monthUsed: quota.monthUsed },
       });
-      return NextResponse.json({ error: "Quota extraction atteint (jour/mois)." }, { status: 429 });
+      return NextResponse.json({ error: "Extraction quota reached (day/month)." }, { status: 429 });
     }
 
     const preferredMode = payload.preferredMode;
@@ -103,8 +103,8 @@ export async function POST(request: NextRequest) {
         fallbackUsed: mode === "ocr",
         message:
           mode === "ocr"
-            ? "Source non HTML detectee. Utilisez le mode OCR."
-            : "Mode manuel force par preference utilisateur.",
+            ? "Non-HTML source detected. Please use OCR mode."
+            : "Manual mode forced by user preference.",
         debug: {
           sourceKind,
           selectedExtractor: "none",
@@ -131,8 +131,8 @@ export async function POST(request: NextRequest) {
           fallbackUsed: mode === "ocr",
           message:
             mode === "ocr"
-              ? "Le lien pointe vers un PDF/image. Utilisez OCR."
-              : "Mode manuel force par preference utilisateur.",
+              ? "The link points to a PDF/image. Please use OCR."
+              : "Manual mode forced by user preference.",
           debug: {
             sourceKind,
             selectedExtractor: "none",
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
             source_type: sourceKind,
             mode: mode === "manual" ? "manual" : "ocr",
             status: "fallback",
-            error_message: "Source non HTML, fallback OCR requis",
+            error_message: "Non-HTML source, OCR fallback required",
           });
         }
 
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
         success: true,
         mode: "web",
         fallbackUsed: false,
-        message: "Extraction web reussie.",
+        message: "Web extraction succeeded.",
         song: parsed.song,
         debug: parsed.debug,
       };
@@ -211,8 +211,8 @@ export async function POST(request: NextRequest) {
       const mode = fallbackUsed ? "ocr" : fallbackModeFromPreference(preferredMode);
       const message =
         mode === "ocr"
-          ? "Extraction web en echec. Passez au mode OCR."
-          : "Extraction web en echec. Passez au mode manuel.";
+          ? "Web extraction failed. Switch to OCR mode."
+          : "Web extraction failed. Switch to manual mode.";
 
       console.warn("[chord-extraction] web extraction failed", {
         url: payload.url,
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
       const errorMessage =
         error instanceof FetchPageError
           ? error.message
-          : "Erreur pendant l'extraction web.";
+          : "Error during web extraction.";
 
       if (payload.persistResult) {
         const supabase = await createClient();
@@ -257,6 +257,6 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     if (error instanceof ZodError) return apiValidationError(error);
-    return handleApiError(error, "Erreur endpoint chord extraction");
+    return handleApiError(error, "Chord extraction endpoint error");
   }
 }

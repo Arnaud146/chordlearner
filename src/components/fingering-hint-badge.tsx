@@ -14,7 +14,7 @@ export function FingeringHintBadge({ fingering }: FingeringHintBadgeProps) {
         variant="outline"
         className={`${optionBClassNames.body} rounded-sm border-[#d2c6ae] bg-[#fefcf8] text-[#7a6f5c]`}
       >
-        Doigté indisponible
+        Fingering unavailable
       </Badge>
     );
   }
@@ -24,7 +24,7 @@ export function FingeringHintBadge({ fingering }: FingeringHintBadgeProps) {
       variant="secondary"
       className={`${optionBClassNames.body} rounded-sm border border-[#d9ccb2] bg-[#f1e8d8] text-[#5a5246]`}
     >
-      Doigté RH: {fingering.join("-")}
+      RH fingering: {fingering.join("-")}
     </Badge>
   );
 }

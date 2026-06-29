@@ -61,11 +61,11 @@ export function buildChordLines(occurrences: ChordOccurrenceRow[]): string[] {
 }
 
 export function buildExportMeta(input: ExportMetadataInput): ExportMetadata {
-  const artist = input.songArtist?.trim() ? input.songArtist.trim() : "Artiste inconnu";
+  const artist = input.songArtist?.trim() ? input.songArtist.trim() : "Unknown artist";
   return {
     title: input.songTitle.trim(),
-    artistLabel: `Artiste: ${artist}`,
-    keyLabel: `Tonalite: ${input.currentKey ?? "Non definie"}`,
+    artistLabel: `Artist: ${artist}`,
+    keyLabel: `Key: ${input.currentKey ?? "Not set"}`,
     notationLabel: `Notation: ${input.notationPreference}`,
   };
 }

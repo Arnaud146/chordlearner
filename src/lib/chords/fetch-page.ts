@@ -50,7 +50,7 @@ function validateUrl(url: string): URL {
   try {
     return assertSafeUrl(url);
   } catch {
-    throw new FetchPageError("INVALID_URL", "URL invalide ou non autorisee.");
+    throw new FetchPageError("INVALID_URL", "Invalid or unauthorized URL.");
   }
 }
 
@@ -85,20 +85,20 @@ export async function fetchPage(url: string): Promise<FetchPageResult> {
 
       const location = response.headers.get("location");
       if (!location) {
-        throw new FetchPageError("HTTP_ERROR", "Redirection sans header Location.");
+        throw new FetchPageError("HTTP_ERROR", "Redirect without a Location header.");
       }
 
       const redirectTarget = new URL(location, currentUrl);
       try {
         assertSafeUrl(redirectTarget.toString());
       } catch {
-        throw new FetchPageError("INVALID_URL", "La redirection pointe vers une URL non autorisee.");
+        throw new FetchPageError("INVALID_URL", "The redirect points to an unauthorized URL.");
       }
       currentUrl = redirectTarget;
     }
 
     if (!response) {
-      throw new FetchPageError("NETWORK_ERROR", "Aucune reponse recue.");
+      throw new FetchPageError("NETWORK_ERROR", "No response received.");
     }
 
     const contentType = response.headers.get("content-type") ?? "";
@@ -106,7 +106,7 @@ export async function fetchPage(url: string): Promise<FetchPageResult> {
     if (!response.ok) {
       throw new FetchPageError(
         "HTTP_ERROR",
-        `La page a renvoye un statut HTTP ${response.status}.`,
+        `The page returned HTTP status ${response.status}.`,
         { status: response.status, contentType },
       );
     }
@@ -114,7 +114,7 @@ export async function fetchPage(url: string): Promise<FetchPageResult> {
     if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
       throw new FetchPageError(
         "NON_HTML_CONTENT",
-        `Type de contenu non HTML: ${contentType || "inconnu"}.`,
+        `Non-HTML content type: ${contentType || "unknown"}.`,
         { status: response.status, contentType },
       );
     }
@@ -133,13 +133,13 @@ export async function fetchPage(url: string): Promise<FetchPageResult> {
     if (error instanceof DOMException && error.name === "AbortError") {
       throw new FetchPageError(
         "TIMEOUT",
-        `Timeout de ${timeoutMs}ms atteint pendant le telechargement de la page.`,
+        `Timeout of ${timeoutMs}ms reached while downloading the page.`,
       );
     }
 
     throw new FetchPageError(
       "NETWORK_ERROR",
-      "Erreur reseau pendant l'extraction web.",
+      "Network error during web extraction.",
     );
   } finally {
     clearTimeout(timeoutId);

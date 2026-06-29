@@ -8,7 +8,7 @@ const PRIVATE_IP_PATTERN =
 
 const ALLOWED_PROTOCOLS = new Set(["http:", "https:"]);
 
-export class UnsafeUrlError extends Error {
+class UnsafeUrlError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "UnsafeUrlError";
@@ -20,22 +20,22 @@ export function assertSafeUrl(url: string): URL {
   try {
     parsed = new URL(url);
   } catch {
-    throw new UnsafeUrlError("URL invalide.");
+    throw new UnsafeUrlError("Invalid URL.");
   }
 
   if (!ALLOWED_PROTOCOLS.has(parsed.protocol)) {
-    throw new UnsafeUrlError("Seuls les protocoles HTTP et HTTPS sont autorises.");
+    throw new UnsafeUrlError("Only HTTP and HTTPS protocols are allowed.");
   }
 
   const hostname = parsed.hostname.toLowerCase();
 
   if (PRIVATE_IP_PATTERN.test(hostname)) {
-    throw new UnsafeUrlError("URL cible non autorisee.");
+    throw new UnsafeUrlError("Target URL not allowed.");
   }
 
   // Block numeric IPs that resolve to private ranges (e.g., 0x7f000001)
   if (/^\d+$/.test(hostname)) {
-    throw new UnsafeUrlError("URL cible non autorisee.");
+    throw new UnsafeUrlError("Target URL not allowed.");
   }
 
   return parsed;

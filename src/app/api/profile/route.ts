@@ -53,9 +53,9 @@ export async function GET() {
     });
   } catch (error) {
     if (isProfilesTableMissing(error)) {
-      return apiError("La table profiles est introuvable. Lance la migration 005_profiles.sql.", 500);
+      return apiError("The profiles table was not found. Run the 005_profiles.sql migration.", 500);
     }
-    return handleApiError(error, "Impossible de charger le profil");
+    return handleApiError(error, "Unable to load the profile");
   }
 }
 
@@ -83,8 +83,8 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     if (isProfilesTableMissing(error)) {
-      return apiError("La table profiles est introuvable. Lance la migration 005_profiles.sql.", 500);
+      return apiError("The profiles table was not found. Run the 005_profiles.sql migration.", 500);
     }
-    return handleApiError(error, "Impossible de mettre a jour le profil");
+    return handleApiError(error, "Unable to update the profile");
   }
 }

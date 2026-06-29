@@ -28,51 +28,51 @@ export default async function StatusPage() {
   checks.push({
     label: "NEXT_PUBLIC_SUPABASE_URL",
     ok: hasSupabaseUrl,
-    details: hasSupabaseUrl ? "Configuree" : "Manquante",
+    details: hasSupabaseUrl ? "Configured" : "Missing",
   });
   checks.push({
     label: "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     ok: hasAnonKey,
-    details: hasAnonKey ? "Configuree" : "Manquante",
+    details: hasAnonKey ? "Configured" : "Missing",
   });
   checks.push({
     label: "SUPABASE_SERVICE_ROLE_KEY",
     ok: hasServiceRoleKey,
-    details: hasServiceRoleKey ? "Configuree" : "Manquante (recommandee)",
+    details: hasServiceRoleKey ? "Configured" : "Missing (recommended)",
   });
   checks.push({
     label: "OCR_SPACE_API_KEY",
     ok: hasOCRSpaceKey,
     details: hasOCRSpaceKey
-      ? "Configuree (OCR.space utilisable)"
-      : "Manquante (optionnel)",
+      ? "Configured (OCR.space available)"
+      : "Missing (optional)",
   });
   checks.push({
     label: "GOOGLE_CLOUD_VISION_API_KEY",
     ok: hasGoogleVisionKey,
     details: hasGoogleVisionKey
-      ? "Configuree (Google Vision utilisable)"
-      : "Manquante (optionnel)",
+      ? "Configured (Google Vision available)"
+      : "Missing (optional)",
   });
   checks.push({
     label: "GOOGLE_VISION_PDF_ASYNC_AUTH",
     ok: hasGoogleVisionServiceAccount,
     details: hasGoogleVisionServiceAccount
-      ? "Configuree (Service Account detecte)"
-      : "Manquante (optionnel, requis pour PDF async Google Vision)",
+      ? "Configured (Service Account detected)"
+      : "Missing (optional, required for Google Vision async PDF)",
   });
   checks.push({
     label: "GOOGLE_CLOUD_VISION_PDF_BUCKET",
     ok: hasGoogleVisionPdfBucket,
     details: hasGoogleVisionPdfBucket
-      ? "Configuree (bucket PDF async)"
-      : "Manquante (optionnel, requis pour PDF async Google Vision)",
+      ? "Configured (async PDF bucket)"
+      : "Missing (optional, required for Google Vision async PDF)",
   });
 
   let dbConnectivity: CheckResult = {
-    label: "Connexion Supabase DB",
+    label: "Supabase DB connection",
     ok: false,
-    details: "Non testee",
+    details: "Not tested",
   };
 
   if (hasSupabaseUrl && hasAnonKey) {
@@ -81,29 +81,29 @@ export default async function StatusPage() {
       const { error } = await supabase.from("songs").select("id").limit(1);
       if (error) {
         dbConnectivity = {
-          label: "Connexion Supabase DB",
+          label: "Supabase DB connection",
           ok: false,
-          details: `Erreur: ${error.message}`,
+          details: `Error: ${error.message}`,
         };
       } else {
         dbConnectivity = {
-          label: "Connexion Supabase DB",
+          label: "Supabase DB connection",
           ok: true,
-          details: "OK (table songs accessible)",
+          details: "OK (songs table accessible)",
         };
       }
     } catch (error) {
       dbConnectivity = {
-        label: "Connexion Supabase DB",
+        label: "Supabase DB connection",
         ok: false,
-        details: error instanceof Error ? error.message : "Erreur inconnue",
+        details: error instanceof Error ? error.message : "Unknown error",
       };
     }
   } else {
     dbConnectivity = {
-      label: "Connexion Supabase DB",
+      label: "Supabase DB connection",
       ok: false,
-      details: "Variables Supabase manquantes",
+      details: "Supabase variables missing",
     };
   }
 
@@ -112,31 +112,31 @@ export default async function StatusPage() {
   const allCriticalOk =
     hasSupabaseUrl &&
     hasAnonKey &&
-    Boolean(checks.find((c) => c.label === "Connexion Supabase DB")?.ok);
+    Boolean(checks.find((c) => c.label === "Supabase DB connection")?.ok);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Status</h1>
         <p className="text-muted-foreground">
-          Verification rapide de la configuration locale (sans exposer de secrets).
+          Quick check of the local configuration (without exposing secrets).
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Etat global</CardTitle>
+          <CardTitle>Overall status</CardTitle>
         </CardHeader>
         <CardContent>
           <Badge variant={asBadge(Boolean(allCriticalOk))}>
-            {allCriticalOk ? "Pret pour tester l'app" : "Configuration incomplete"}
+            {allCriticalOk ? "Ready to test the app" : "Incomplete configuration"}
           </Badge>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Checks configuration</CardTitle>
+          <CardTitle>Configuration checks</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {checks.map((check) => (

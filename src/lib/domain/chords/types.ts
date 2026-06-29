@@ -12,6 +12,8 @@ export type QualityCanonical =
   | "sixth"
   | "minor6"
   | "diminished"
+  | "diminished7"
+  | "half-diminished"
   | "augmented";
 
 export interface ChordToken {

@@ -44,7 +44,7 @@ export interface SongSection {
   lines: StructuredSongLine[];
 }
 
-export interface StructuredSongStats {
+interface StructuredSongStats {
   totalLines: number;
   chordLines: number;
   lyricLines: number;

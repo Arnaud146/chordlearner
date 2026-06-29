@@ -21,13 +21,13 @@ export function UniqueChordList({
     <Card className="rounded-2xl border-[var(--song-border)] bg-[var(--song-surface)] shadow-[var(--song-shadow)]">
       <CardHeader>
         <CardTitle className={`${optionBClassNames.display} text-4xl font-bold text-[var(--song-text)]`}>
-          Accords uniques
+          Unique chords
         </CardTitle>
       </CardHeader>
       <CardContent>
         {chords.length === 0 ? (
           <p className={`${optionBClassNames.body} text-sm text-[var(--song-text-muted)]`}>
-            Aucun accord unique.
+            No unique chords.
           </p>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -53,7 +53,7 @@ export function UniqueChordList({
                   </Badge>
                   {!chord.is_supported ? (
                     <Badge variant="destructive" className={`${optionBClassNames.body} ml-1 rounded-full`}>
-                      inconnu
+                      unknown
                     </Badge>
                   ) : null}
                 </button>

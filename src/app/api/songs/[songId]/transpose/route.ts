@@ -29,6 +29,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       data: result,
     });
   } catch (error) {
-    return handleApiError(error, "Impossible de transposer le morceau");
+    return handleApiError(error, "Unable to transpose the song");
   }
 }

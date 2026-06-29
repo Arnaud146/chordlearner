@@ -136,7 +136,7 @@ interface GoogleVisionAsyncOutputFile {
   responses?: GoogleVisionAsyncFileResponse[];
 }
 
-export interface OCRServiceToken {
+interface OCRServiceToken {
   text: string;
   confidence: number;
   lineIndex: number;
@@ -208,7 +208,7 @@ function getOCRSpaceApiKeyOrThrow(): string {
   const key = process.env.OCR_SPACE_API_KEY;
   if (!key) {
     throw new Error(
-      "OCR non configure: variable OCR_SPACE_API_KEY manquante. Utilisez la saisie manuelle.",
+      "OCR not configured: OCR_SPACE_API_KEY variable is missing. Use manual entry.",
     );
   }
   return key;
@@ -218,7 +218,7 @@ function getGoogleVisionApiKeyOrThrow(): string {
   const key = process.env.GOOGLE_CLOUD_VISION_API_KEY;
   if (!key) {
     throw new Error(
-      "OCR non configure: variable GOOGLE_CLOUD_VISION_API_KEY manquante. Utilisez la saisie manuelle.",
+      "OCR not configured: GOOGLE_CLOUD_VISION_API_KEY variable is missing. Use manual entry.",
     );
   }
   return key;
@@ -228,7 +228,7 @@ function getGoogleVisionPdfBucketOrThrow(): string {
   const bucket = process.env.GOOGLE_CLOUD_VISION_PDF_BUCKET?.trim();
   if (!bucket) {
     throw new Error(
-      "Google Vision PDF async non configure: variable GOOGLE_CLOUD_VISION_PDF_BUCKET manquante.",
+      "Google Vision async PDF not configured: GOOGLE_CLOUD_VISION_PDF_BUCKET variable is missing.",
     );
   }
   return bucket;
@@ -240,14 +240,14 @@ function parseServiceAccountJsonOrThrow(raw: string): GoogleServiceAccountCreden
     parsed = JSON.parse(raw);
   } catch {
     throw new Error(
-      "Google Vision PDF async non configure: JSON de service account invalide.",
+      "Google Vision async PDF not configured: invalid service account JSON.",
     );
   }
 
   const candidate = parsed as Partial<GoogleServiceAccountCredentials>;
   if (!candidate.client_email || !candidate.private_key) {
     throw new Error(
-      "Google Vision PDF async non configure: client_email/private_key manquants.",
+      "Google Vision async PDF not configured: client_email/private_key missing.",
     );
   }
   return {
@@ -270,12 +270,12 @@ async function getGoogleServiceAccountCredentialsOrThrow(): Promise<GoogleServic
   }
 
   throw new Error(
-    "Google Vision PDF async non configure: ajoutez GOOGLE_CLOUD_VISION_SERVICE_ACCOUNT_JSON ou GOOGLE_CLOUD_VISION_SERVICE_ACCOUNT_FILE.",
+    "Google Vision async PDF not configured: add GOOGLE_CLOUD_VISION_SERVICE_ACCOUNT_JSON or GOOGLE_CLOUD_VISION_SERVICE_ACCOUNT_FILE.",
   );
 }
 
 function normalizeErrorMessage(message?: string[] | string): string {
-  if (!message) return "Erreur OCR inconnue";
+  if (!message) return "Unknown OCR error";
   if (Array.isArray(message)) return message.join(" ");
   return message;
 }
@@ -285,13 +285,13 @@ function normalizeGoogleVisionErrorMessage(
   imageUrl: string,
 ): string {
   if (isPdfUrl(imageUrl)) {
-    return "Google Vision PDF async a echoue. Verifiez le bucket, les permissions service account et le format PDF.";
+    return "Google Vision async PDF failed. Check the bucket, the service account permissions and the PDF format.";
   }
   if (/Bad image data/i.test(message)) {
-    return "Google Vision n'a pas pu lire l'image source. Verifiez le format (PNG/JPG) et que le contenu est valide.";
+    return "Google Vision could not read the source image. Check the format (PNG/JPG) and that the content is valid.";
   }
   if (/does not appear to be accessible/i.test(message)) {
-    return "Google Vision ne peut pas acceder a l'URL fournie. Verifiez que le fichier est public et accessible sans authentification.";
+    return "Google Vision cannot access the provided URL. Check that the file is public and accessible without authentication.";
   }
   return message;
 }
@@ -338,7 +338,7 @@ async function getGoogleAccessToken(
       payloadJson.error_description ??
       payloadJson.error ??
       `HTTP ${response.status}`;
-    throw new Error(`Auth Google Vision echouee: ${message}`);
+    throw new Error(`Google Vision auth failed: ${message}`);
   }
   return payloadJson.access_token;
 }
@@ -355,7 +355,7 @@ async function uploadPdfFromPublicUrlToGcs(params: {
   });
   if (!sourceResponse.ok) {
     throw new Error(
-      `Impossible de telecharger le PDF source (${sourceResponse.status}).`,
+      `Unable to download the source PDF (${sourceResponse.status}).`,
     );
   }
 
@@ -363,7 +363,7 @@ async function uploadPdfFromPublicUrlToGcs(params: {
     sourceResponse.headers.get("content-type")?.toLowerCase() ?? "";
   if (!contentType.includes("application/pdf") && !isPdfUrl(params.imageUrl)) {
     throw new Error(
-      "Le fichier source ne semble pas etre un PDF valide pour Google Vision async.",
+      "The source file does not appear to be a valid PDF for Google Vision async.",
     );
   }
 
@@ -385,7 +385,7 @@ async function uploadPdfFromPublicUrlToGcs(params: {
   if (!uploadResponse.ok) {
     const details = await uploadResponse.text();
     throw new Error(
-      `Upload GCS PDF echoue (${uploadResponse.status}): ${details.slice(0, 300)}`,
+      `GCS PDF upload failed (${uploadResponse.status}): ${details.slice(0, 300)}`,
     );
   }
 }
@@ -423,7 +423,7 @@ async function startVisionAsyncPdfOperation(params: {
   const payload = (await response.json()) as GoogleLongRunningOperation;
   if (!response.ok || !payload.name) {
     const details = payload.error?.message ?? `HTTP ${response.status}`;
-    throw new Error(`Lancement async Google Vision echoue: ${details}`);
+    throw new Error(`Google Vision async start failed: ${details}`);
   }
   return payload.name;
 }
@@ -449,11 +449,11 @@ async function waitForVisionOperation(params: {
     const payload = (await response.json()) as GoogleLongRunningOperation;
     if (!response.ok) {
       const details = payload.error?.message ?? `HTTP ${response.status}`;
-      throw new Error(`Polling operation Google Vision echoue: ${details}`);
+      throw new Error(`Google Vision operation polling failed: ${details}`);
     }
     if (payload.done) {
       if (payload.error?.message) {
-        throw new Error(`Operation Google Vision echouee: ${payload.error.message}`);
+        throw new Error(`Google Vision operation failed: ${payload.error.message}`);
       }
       return;
     }
@@ -461,7 +461,7 @@ async function waitForVisionOperation(params: {
     await sleep(params.pollIntervalMs);
   }
 
-  throw new Error("Timeout Google Vision async: operation non terminee.");
+  throw new Error("Google Vision async timeout: operation not completed.");
 }
 
 async function listGcsObjectNames(params: {
@@ -480,7 +480,7 @@ async function listGcsObjectNames(params: {
 
   const payload = (await response.json()) as GoogleStorageListResponse;
   if (!response.ok) {
-    throw new Error(`Listing GCS echoue (${response.status}).`);
+    throw new Error(`GCS listing failed (${response.status}).`);
   }
 
   return (payload.items ?? [])
@@ -503,7 +503,7 @@ async function readGcsJsonObject<T>(params: {
   );
   if (!response.ok) {
     throw new Error(
-      `Lecture resultat GCS echouee (${response.status}) pour ${params.objectName}.`,
+      `Failed to read GCS result (${response.status}) for ${params.objectName}.`,
     );
   }
   return (await response.json()) as T;
@@ -557,7 +557,7 @@ async function parseVisionAsyncPdfResult(params: {
     .sort((a, b) => scoreOutputObjectName(a) - scoreOutputObjectName(b));
 
   if (outputJsonObjects.length === 0) {
-    throw new Error("Google Vision async n'a produit aucun fichier JSON.");
+    throw new Error("Google Vision async produced no JSON file.");
   }
 
   const pageChunks: Array<{ pageNumber: number; text: string }> = [];
@@ -573,7 +573,7 @@ async function parseVisionAsyncPdfResult(params: {
 
     for (const response of outputFile.responses ?? []) {
       if (response.error?.message) {
-        throw new Error(`Google Vision a echoue: ${response.error.message}`);
+        throw new Error(`Google Vision failed: ${response.error.message}`);
       }
       const text =
         response.fullTextAnnotation?.text ??
@@ -596,7 +596,7 @@ async function parseVisionAsyncPdfResult(params: {
   }
 
   if (pageChunks.length === 0) {
-    throw new Error("Google Vision async n'a renvoye aucun texte exploitable.");
+    throw new Error("Google Vision async returned no usable text.");
   }
 
   const rawText = pageChunks
@@ -672,7 +672,7 @@ async function detectTextWithGoogleVisionPdfAsync(
     throw new Error(
       error instanceof Error
         ? error.message
-        : "Google Vision PDF async a echoue.",
+        : "Google Vision async PDF failed.",
     );
   } finally {
     await cleanupGcsObjects({
@@ -1017,7 +1017,7 @@ export async function detectTextWithOCRSpace(imageUrl: string): Promise<OCRServi
 
   if (!response.ok) {
     throw new Error(
-      `OCR.space indisponible (${response.status}). Reessayez plus tard ou utilisez la saisie manuelle.`,
+      `OCR.space unavailable (${response.status}). Try again later or use manual entry.`,
     );
   }
 
@@ -1025,13 +1025,13 @@ export async function detectTextWithOCRSpace(imageUrl: string): Promise<OCRServi
 
   if (payload.IsErroredOnProcessing) {
     throw new Error(
-      `OCR.space a echoue: ${normalizeErrorMessage(payload.ErrorMessage)}. Utilisez la saisie manuelle si besoin.`,
+      `OCR.space failed: ${normalizeErrorMessage(payload.ErrorMessage)}. Use manual entry if needed.`,
     );
   }
 
   const parsedResults = payload.ParsedResults ?? [];
   if (!parsedResults.length) {
-    throw new Error("OCR.space n'a renvoye aucun resultat exploitable.");
+    throw new Error("OCR.space returned no usable result.");
   }
 
   return buildOCRSpaceResult(parsedResults);
@@ -1076,18 +1076,18 @@ export async function detectTextWithGoogleVision(imageUrl: string): Promise<OCRS
       // Ignore parse errors and keep generic message.
     }
     throw new Error(
-      `Google Vision indisponible (${response.status})${details}. Reessayez plus tard ou utilisez la saisie manuelle.`,
+      `Google Vision unavailable (${response.status})${details}. Try again later or use manual entry.`,
     );
   }
 
   const payload = (await response.json()) as GoogleVisionResponse;
   const first = payload.responses?.[0];
   if (!first) {
-    throw new Error("Google Vision n'a renvoye aucun resultat exploitable.");
+    throw new Error("Google Vision returned no usable result.");
   }
   if (first.error?.message) {
     throw new Error(
-      `Google Vision a echoue: ${normalizeGoogleVisionErrorMessage(first.error.message, imageUrl)}`,
+      `Google Vision failed: ${normalizeGoogleVisionErrorMessage(first.error.message, imageUrl)}`,
     );
   }
 

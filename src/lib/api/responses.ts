@@ -9,7 +9,7 @@ export function apiError(message: string, status = 400) {
 
 export function apiValidationError(error: ZodError) {
   const firstIssue = error.issues[0];
-  return apiError(firstIssue?.message ?? "Payload invalide", 400);
+  return apiError(firstIssue?.message ?? "Invalid payload", 400);
 }
 
 /**
@@ -18,14 +18,14 @@ export function apiValidationError(error: ZodError) {
  */
 export function handleApiError(error: unknown, fallbackMessage: string, fallbackStatus = 500) {
   if (error instanceof AuthRequiredError) {
-    return apiError("Authentification requise", 401);
+    return apiError("Authentication required", 401);
   }
   if (error instanceof ZodError) {
     return apiValidationError(error);
   }
   if (error instanceof DatabaseError) {
     console.error("[db]", error.code, error.message);
-    return apiError("Une erreur de base de donnees est survenue", 500);
+    return apiError("A database error occurred", 500);
   }
   return apiError(fallbackMessage, fallbackStatus);
 }

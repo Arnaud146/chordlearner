@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-export const voicingHandModeSchema = z.enum(["RH", "BH"]);
+const voicingHandModeSchema = z.enum(["RH", "BH"]);
 
 export const voicingQuerySchema = z.object({
-  chord: z.string().trim().min(1, "Le paramètre chord est requis"),
-  keyContext: z.string().trim().min(1, "Le paramètre keyContext est requis"),
+  chord: z.string().trim().min(1, "The chord parameter is required"),
+  keyContext: z.string().trim().min(1, "The keyContext parameter is required"),
   handMode: voicingHandModeSchema.default("RH"),
 });
 
@@ -12,8 +12,5 @@ export const voicingSelectionBodySchema = z.object({
   chord: z.string().trim().min(1),
   keyContext: z.string().trim().min(1),
   handMode: voicingHandModeSchema.default("RH"),
-  selectedVoicingOptionId: z.string().uuid("selectedVoicingOptionId invalide"),
+  selectedVoicingOptionId: z.string().uuid("Invalid selectedVoicingOptionId"),
 });
-
-export type VoicingQueryInput = z.infer<typeof voicingQuerySchema>;
-export type VoicingSelectionBodyInput = z.infer<typeof voicingSelectionBodySchema>;

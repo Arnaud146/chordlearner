@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const song = await repo.getSongById(songId);
     return NextResponse.json({ data: song });
   } catch (error) {
-    return handleApiError(error, "Chanson introuvable", 404);
+    return handleApiError(error, "Song not found", 404);
   }
 }
 
@@ -42,7 +42,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     });
     return NextResponse.json({ data: updated });
   } catch (error) {
-    return handleApiError(error, "Impossible de mettre a jour la chanson");
+    return handleApiError(error, "Unable to update the song");
   }
 }
 
@@ -55,6 +55,6 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     await repo.deleteSong(songId);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return handleApiError(error, "Impossible de supprimer la chanson");
+    return handleApiError(error, "Unable to delete the song");
   }
 }
