@@ -219,6 +219,35 @@ describe("ocr postprocess", () => {
     expect(chords).toEqual(["C", "Am", "F", "G", "Em", "Dm"]);
   });
 
+  it("does not invent sharps when a natural key fits the song", () => {
+    // "Here There And Everywhere" (G major, verse + bridge). A naive key
+    // detector picks F# major because it can fabricate sharps onto
+    // G/Am/C/F/Gm, scoring those corrections as highly as the native matches
+    // in G major. The natural key must win so nothing changes.
+    const text = [
+      ["G", "Am", "Bm", "C", "G", "Am"],
+      ["Bm", "C", "F#m7b5", "B7"],
+      ["F#m7b5", "B7", "Em", "Am", "Am7", "D7"],
+      ["F", "Bb", "Gm"],
+      ["Cm", "D7", "Gm"],
+      ["Cm", "D7"],
+    ];
+    const candidates = text.flatMap((line, lineIndex) =>
+      line.map((token, wordIndex) => ({
+        text: token,
+        confidence: 95,
+        lineIndex,
+        wordIndex,
+      })),
+    );
+
+    const result = postprocessOCRTokens(candidates, { chordsOnly: true });
+
+    // Every chord must come back exactly as written: no fabricated sharps.
+    const chords = result.tokens.map((t) => t.text);
+    expect(chords).toEqual(text.flat());
+  });
+
   it("merges adjacent bare note into slash chord when pixels are close", () => {
     const result = postprocessOCRTokens(
       [

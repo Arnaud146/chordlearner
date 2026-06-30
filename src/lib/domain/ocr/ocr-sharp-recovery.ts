@@ -86,20 +86,32 @@ function detectKey(
   options?: DetectKeyOptions,
 ): KeyDetectionResult | null {
   const requireSharps = options?.requireSharpCorrections ?? true;
+  // A chord that already fits the key as-is is far stronger evidence than one
+  // that only fits after fabricating a dropped sharp. Without this weighting a
+  // wrong key (e.g. F#) that can sharpen many naturals (G->G#m, C->C#, F->F#)
+  // ties or beats the true natural key (e.g. G) that matches outright, and the
+  // recovery then invents accidentals that were never in the source.
+  const NATIVE_WEIGHT = 2;
+  const SHARP_WEIGHT = 1;
   let bestKey = "";
   let bestScore = 0;
+  let bestMatches = 0;
   let bestSharpCount = 0;
+  // Best fit achievable using only chords that already match a key as-is.
+  let maxNativeMatches = 0;
 
   for (const [key, diatonicChords] of Object.entries(DIATONIC)) {
     const diatonicSet = new Set(diatonicChords);
     let score = 0;
+    let matches = 0;
     let sharpCorrections = 0;
 
     for (const info of parsedInfos) {
       const kc = toKeyChord(info.root, info.quality);
 
       if (diatonicSet.has(kc)) {
-        score++;
+        score += NATIVE_WEIGHT;
+        matches++;
         continue;
       }
 
@@ -107,31 +119,46 @@ function detectKey(
 
       const sharpRoot = info.root + "#";
       if (diatonicSet.has(toKeyChord(sharpRoot, info.quality))) {
-        score++;
+        score += SHARP_WEIGHT;
+        matches++;
         sharpCorrections++;
         continue;
       }
 
       if (!info.quality.startsWith("m") || info.quality.startsWith("maj")) {
         if (diatonicSet.has(sharpRoot + "m")) {
-          score++;
+          score += SHARP_WEIGHT;
+          matches++;
           sharpCorrections++;
         }
       }
     }
 
+    maxNativeMatches = Math.max(maxNativeMatches, matches - sharpCorrections);
+
     if (firstRoot && key === firstRoot) {
-      score += 1;
+      score += NATIVE_WEIGHT;
     }
 
     if (score > bestScore) {
       bestScore = score;
       bestKey = key;
+      bestMatches = matches;
       bestSharpCount = sharpCorrections;
     }
   }
 
-  if (!bestKey || bestScore < parsedInfos.length * 0.5) {
+  if (!bestKey || bestMatches < parsedInfos.length * 0.5) {
+    return null;
+  }
+
+  // Hard guarantee against the "# on nearly every chord" failure: never invent
+  // sharps when leaving the chords untouched explains them at least as well as
+  // sharpening does. A genuine all-sharps-dropped chart fits no key natively, so
+  // its native fit is far below the sharpened fit and recovery still runs; a
+  // chart that is already coherent (the bug case) has a native fit that meets or
+  // beats the sharpened one, so it is left exactly as written.
+  if (requireSharps && maxNativeMatches >= bestMatches) {
     return null;
   }
 
