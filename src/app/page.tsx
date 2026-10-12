@@ -30,8 +30,8 @@ export default async function LandingPage() {
 
   try {
     const supabase = await createClient();
-    const { data } = await supabase.auth.getUser();
-    if (data.user) redirect("/songs");
+    const { data } = await supabase.auth.getClaims();
+    if (data?.claims) redirect("/songs");
   } catch {
     // not logged in — show landing page
   }

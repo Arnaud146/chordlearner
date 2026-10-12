@@ -38,8 +38,8 @@ export default async function RootLayout({
 
   try {
     const supabase = await createClient();
-    const { data } = await supabase.auth.getUser();
-    userEmail = data.user?.email ?? null;
+    const { data } = await supabase.auth.getClaims();
+    userEmail = data?.claims.email ?? null;
   } catch {
     userEmail = null;
   }
