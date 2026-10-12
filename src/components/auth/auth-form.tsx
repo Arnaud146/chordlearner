@@ -127,10 +127,10 @@ export function AuthForm({
           type="password"
           autoComplete={mode === "login" ? "current-password" : "new-password"}
           required
-          minLength={10}
+          minLength={mode === "signup" ? 10 : undefined}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="At least 10 characters"
+          placeholder={mode === "signup" ? "At least 10 characters" : undefined}
           disabled={isSubmitting}
         />
       </div>
